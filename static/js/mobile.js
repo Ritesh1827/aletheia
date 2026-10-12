@@ -5,27 +5,56 @@
   function $(sel, root) { return (root || document).querySelector(sel); }
   function $all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 
-  // ---- Drawer: close on ESC, scrim click, nav click; lock body scroll ----
+  var lastToggleFocus = null;
+
+  // ---- Drawer: Alpine owns navOpen when present; we sync class + scroll lock ----
   function shell() { return $(".shell"); }
-  function setNav(open) {
+  function alpineData(el) {
+    try {
+      if (window.Alpine && typeof window.Alpine.$data === "function") return window.Alpine.$data(el);
+    } catch (e) { /* Alpine not ready */ }
+    return null;
+  }
+  function applyNav(open, returnFocus) {
     var s = shell();
     if (!s) return;
-    // Alpine owns navOpen if present; keep DOM class in sync both ways.
     s.classList.toggle("nav-open", !!open);
     document.body.classList.toggle("nav-locked", !!open);
     var btn = $('[data-nav-toggle]');
     if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+    if (open) {
+      var first = s.querySelector(".sidebar a.nav-item");
+      if (first) setTimeout(function () { try { first.focus({ preventScroll: true }); } catch (e) { first.focus(); } }, 60);
+    } else if (returnFocus && lastToggleFocus && lastToggleFocus.focus) {
+      try { lastToggleFocus.focus({ preventScroll: true }); } catch (e) { lastToggleFocus.focus(); }
+    }
+  }
+  function setNav(open) {
+    var s = shell();
+    if (!s) return;
+    var d = alpineData(s);
+    if (d && typeof d.navOpen !== "undefined") {
+      d.navOpen = !!open; // Alpine :class binding flips the class; observer syncs lock
+      applyNav(!!open, false); // immediate sync in case Alpine is slow
+    } else {
+      applyNav(open, false);
+    }
   }
   function isNavOpen() {
     var s = shell();
-    return !!(s && s.classList.contains("nav-open"));
+    if (!s) return false;
+    var d = alpineData(s);
+    if (d && typeof d.navOpen !== "undefined") return !!d.navOpen;
+    return s.classList.contains("nav-open");
   }
 
   document.addEventListener("click", function (ev) {
     var t = ev.target instanceof Element ? ev.target : null;
     if (!t) return;
-    if (t.closest("[data-nav-toggle]")) {
+    var toggle = t.closest("[data-nav-toggle]");
+    if (toggle) {
       ev.preventDefault();
+      lastToggleFocus = toggle;
       setNav(!isNavOpen());
       return;
     }
@@ -50,20 +79,19 @@
         }
       }
     }
-    // Back to top
+    // Back to top (honour reduced motion)
     if (t.closest("[data-to-top]")) {
-      window.scrollTo({ top: 0, behavior: "prefers-reduced-motion" in window ? "auto" : "smooth" });
-      // smooth unless reduced motion
-      if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        window.scrollTo(0, 0);
-      }
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
     }
-    // Share (Web Share API with clipboard fallback)
+    // Share (Web Share API with clipboard fallback; resolve relative URLs)
     if (t.closest("[data-share]")) {
       var el = t.closest("[data-share]");
       var title = el.getAttribute("data-share-title") || document.title;
       var text = el.getAttribute("data-share-text") || "";
-      var url = el.getAttribute("data-share-url") || location.href;
+      var raw = el.getAttribute("data-share-url") || location.href;
+      var url = raw;
+      try { url = new URL(raw, location.origin).href; } catch (e) { url = raw; }
       if (navigator.share) {
         navigator.share({ title: title, text: text, url: url }).catch(function () {});
       } else if (window.copyText) {
@@ -76,15 +104,36 @@
     if (ev.key === "Escape" && isNavOpen()) setNav(false);
   });
 
-  // Keep Alpine x-data navOpen in sync if Alpine is present.
-  // Alpine toggles the class via :class; observe it to manage scroll lock.
+  // Auto-close drawer when resizing up to desktop.
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > 900 && isNavOpen()) setNav(false);
+  });
+
+  // Swipe left on the open drawer to close (touch).
+  (function wireSwipe() {
+    var startX = null;
+    document.addEventListener("touchstart", function (ev) {
+      if (!isNavOpen()) { startX = null; return; }
+      var touch = ev.touches && ev.touches[0];
+      startX = touch ? touch.clientX : null;
+    }, { passive: true });
+    document.addEventListener("touchend", function (ev) {
+      if (startX === null || !isNavOpen()) return;
+      var touch = ev.changedTouches && ev.changedTouches[0];
+      if (touch && startX - touch.clientX > 64) setNav(false);
+      startX = null;
+    }, { passive: true });
+  })();
+
+  // Keep body scroll-lock + aria in sync when Alpine flips the class itself.
   function observeShell() {
     var s = shell();
     if (!s || !("MutationObserver" in window)) return;
     var obs = new MutationObserver(function () {
-      document.body.classList.toggle("nav-locked", s.classList.contains("nav-open"));
+      var open = s.classList.contains("nav-open");
+      document.body.classList.toggle("nav-locked", open);
       var btn = $('[data-nav-toggle]');
-      if (btn) btn.setAttribute("aria-expanded", s.classList.contains("nav-open") ? "true" : "false");
+      if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
     });
     obs.observe(s, { attributes: true, attributeFilter: ["class"] });
   }
