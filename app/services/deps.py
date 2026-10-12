@@ -83,20 +83,30 @@ def run_redteam_scenario(scenario_id: str, inputs: dict[str, str]) -> ScenarioRe
 
 
 def list_lots(query: str = "", freeze: str = "all", fail: bool = False) -> list[LotSummary]:
-    return mock_lots.list_lots(query=query, freeze=freeze, fail=fail)
+    if config.is_demo():
+        return mock_lots.list_lots(query=query, freeze=freeze, fail=fail)
+    return chain_api.list_lots(query=query, freeze=freeze)
 
 
 def get_lot(lot_id: str) -> LotDetail:
-    return mock_lots.get_lot(lot_id)
+    if config.is_demo() or lot_id.strip().upper() in chain_api._DEMO_LOT_IDS:
+        return mock_lots.get_lot(lot_id)
+    return chain_api.get_lot(lot_id)
 
 
 def get_blast_radius(lot_id: str) -> BlastRadius:
-    return mock_lots.get_blast_radius(lot_id)
+    if config.is_demo() or lot_id.strip().upper() in chain_api._DEMO_LOT_IDS:
+        return mock_lots.get_blast_radius(lot_id)
+    return chain_api.get_blast_radius(lot_id)
 
 
 def freeze_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
-    return mock_lots.freeze_lot(lot_id, reason)
+    if config.is_demo() or lot_id.strip().upper() in chain_api._DEMO_LOT_IDS:
+        return mock_lots.freeze_lot(lot_id, reason)
+    return chain_api.freeze_lot(lot_id, reason)
 
 
 def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
-    return mock_lots.recall_lot(lot_id, reason)
+    if config.is_demo() or lot_id.strip().upper() in chain_api._DEMO_LOT_IDS:
+        return mock_lots.recall_lot(lot_id, reason)
+    return chain_api.recall_lot(lot_id, reason)

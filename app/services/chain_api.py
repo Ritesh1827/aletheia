@@ -168,3 +168,168 @@ def verify_serial(serial: str) -> VerificationVerdict:
         timeline=timeline,
         proof=proof,
     )
+
+
+# ---- Live lots & recall (Phase 4) ----
+
+from app.models.lots import (  # noqa: E402
+    BlastNode,
+    BlastRadius,
+    LotAnchorRef,
+    LotAuditEntry,
+    LotDetail,
+    LotProduct,
+    LotSummary,
+)
+from app.services.mock_lots import LotsBackendError, UnknownLotError  # noqa: E402
+
+_DEMO_LOT_IDS = {"LOT-DEMO-A", "LOT-DEMO-B", "LOT-ERR"}
+
+
+def _lot_get(path: str, lot_id: str) -> dict:
+    try:
+        return _get(path)
+    except UnknownSerialError:
+        raise UnknownLotError(lot_id=lot_id) from None
+    except ChainUnavailableError as exc:
+        raise LotsBackendError(correlation_id=exc.correlation_id) from None
+
+
+def list_lots(query: str = "", freeze: str = "all") -> list[LotSummary]:
+    data = _lot_get("/lots", "?")
+    out = []
+    for l in data.get("lots", []):
+        frozen = bool(l.get("frozen"))
+        if freeze == "frozen" and not frozen:
+            continue
+        if freeze == "active" and frozen:
+            continue
+        if query and query.strip().upper() not in l.get("lot_id", "").upper():
+            continue
+        n_anchors = 1 if l.get("tx") else 0
+        out.append(LotSummary(
+            lot_id=l.get("lot_id", "?"),
+            product=str(l.get("gtin") or l.get("lot_id", "?")),
+            committed_qty=int(l.get("size") or l.get("units") or 0),
+            freeze_state="frozen" if frozen else "active",
+            # Backend recall freezes on-chain; freeze and recall share the flag.
+            recall_state="recalled" if frozen else "none",
+            anchor_state="anchored" if n_anchors else "pending",
+            incidents_open=0,
+        ))
+    return out
+
+
+def get_lot(lot_id: str) -> LotDetail:
+    key = lot_id.strip()
+    if not key or len(key) > 128:
+        raise UnknownLotError(lot_id=key[:128])
+    l = _lot_get(f"/lots/{key}", key)
+    frozen = bool(l.get("frozen"))
+    products = []
+    for u in l.get("units", []):
+        st = str(u.get("status", ""))
+        products.append(LotProduct(
+            serial=u.get("serial", "?"),
+            status=st,
+            custodian=str(u.get("custodian", ""))[:48],
+            sale_state="sold" if st in ("SOLD", "CLAIMED") else "unsold",
+        ))
+    tx = l.get("tx")
+    return LotDetail(
+        lot_id=l.get("lot_id", key),
+        product=str(l.get("gtin") or l.get("lot_id", key)),
+        committed_qty=int(l.get("size") or len(products)),
+        lifecycle="frozen" if frozen else "active",
+        freeze_state="frozen" if frozen else "active",
+        recall_state="recalled" if frozen else "none",
+        permitted_custodians=[str(a)[:48] for a in l.get("custodians", [])],
+        products=products,
+        incidents=[],
+        anchors=[LotAnchorRef(
+            anchor_id=str(tx)[:24] if tx else "BATCH-PENDING",
+            tx_hash=str(tx)[:66] if tx else None,
+            root=str(l.get("root", ""))[:66],
+            event_count=len(products),
+            state="anchored" if tx else "pending",
+        )],
+        audit=[],
+        updated_at=datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+    )
+
+
+_UNIT_TONE = {"CLAIMED": "good", "SOLD": "watch", "FROZEN": "neutral", "ACTIVE": "neutral"}
+
+
+def get_blast_radius(lot_id: str) -> BlastRadius:
+    key = lot_id.strip()
+    if not key or len(key) > 128:
+        raise UnknownLotError(lot_id=key[:128])
+    b = _lot_get(f"/lots/{key}/blast-radius", key)
+    by_status = b.get("by_status", {})
+    sold = int(by_status.get("SOLD", 0)) + int(by_status.get("CLAIMED", 0))
+    unsold = int(by_status.get("ACTIVE", 0))
+    unlocated = int(b.get("invented_attempts", 0))
+    overflow = bool(b.get("overflow"))
+    tree = []
+    for pallet in b.get("tree", []):
+        pnodes = []
+        for case in pallet.get("cases", []):
+            leaves = [BlastNode(
+                label=f"{u.get('serial')} · {str(u.get('status', '')).lower()}",
+                detail=str(u.get("custodian", ""))[:64],
+                link=f"/verify/{u.get('serial')}",
+                tone=_UNIT_TONE.get(str(u.get("status", "")), "neutral"),  # type: ignore[arg-type]
+            ) for u in case.get("units", [])]
+            pnodes.append(BlastNode(
+                label=f"Case {case.get('case_id')}" if case.get("case_id") else "Direct units",
+                detail=f"{len(leaves)} units", tone="neutral", children=leaves,
+            ))
+        pid = pallet.get("pallet_id")
+        tree.append(BlastNode(
+            label=f"Pallet {pid}" if pid else "Unpackaged units",
+            detail=f"{sum(len(c.children) for c in pnodes)} units",
+            tone="neutral", children=pnodes,
+        ))
+    return BlastRadius(
+        lot_id=b.get("lot", key),
+        affected=int(b.get("total_units", 0)),
+        sold=sold, unsold=unsold, unlocated=unlocated,
+        completeness="partial" if overflow else "complete",
+        completeness_note=(
+            "Clone probes hit this lot without matching committed units — "
+            "overflow scans recorded, all committed units traced."
+            if overflow else
+            "All committed units traced to pallets, cases, and custodians."
+        ),
+        tree=tree,
+        incident_links=[],
+    )
+
+
+def _recall_entry(lot_id: str, action: str, reason: str) -> LotAuditEntry:
+    key = lot_id.strip()
+    if not key or len(key) > 128:
+        raise UnknownLotError(lot_id=key[:128])
+    base = config.chain_api_base().rstrip("/")
+    try:
+        r = httpx.post(f"{base}/lots/{key}/recall", timeout=20.0)
+    except Exception as exc:
+        raise LotsBackendError(correlation_id="chain-unreachable") from exc
+    if r.status_code == 404:
+        raise UnknownLotError(lot_id=key)
+    if r.status_code >= 400:
+        raise LotsBackendError(correlation_id=f"chain-{r.status_code}")
+    now = datetime.now(tz=timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    return LotAuditEntry(at=now, actor="chain", action=action,
+                         outcome="recalled" if action == "recall" else "frozen",
+                         reason=reason[:500])
+
+
+def freeze_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
+    # Backend recall freezes on-chain; freeze shares the effect (transfer hold).
+    return _recall_entry(lot_id, "freeze", reason)
+
+
+def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
+    return _recall_entry(lot_id, "recall", reason)
