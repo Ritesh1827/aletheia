@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from app import config
 from app.models.verify import VERDICT_CAVEAT, VERDICT_LABELS
 from app.services import deps
+from app.services.chain_api import ChainUnavailableError
 from app.services.mock_verify import MockBackendError, UnknownSerialError
 
 router = APIRouter()
@@ -57,6 +58,12 @@ def verify_search(
                 "pages/verify_search.html",
                 {**shell("verify"), "q": q, "backend_error": exc.correlation_id},
             )
+        except ChainUnavailableError as exc:
+            return templates.TemplateResponse(
+                request,
+                "pages/verify_search.html",
+                {**shell("verify"), "q": q, "backend_error": exc.correlation_id},
+            )
         return RedirectResponse(url=f"/verify/{verdict.serial}", status_code=303)
     return templates.TemplateResponse(
         request,
@@ -83,6 +90,13 @@ def verify_detail(request: Request, serial: str) -> HTMLResponse:
             {**shell("verify"), "q": serial, "backend_error": exc.correlation_id},
             status_code=502,
         )
+    except ChainUnavailableError as exc:
+        return templates.TemplateResponse(
+            request,
+            "pages/verify_search.html",
+            {**shell("verify"), "q": serial, "backend_error": exc.correlation_id},
+            status_code=502,
+        )
     return templates.TemplateResponse(
         request,
         "pages/verify_detail.html",
@@ -99,5 +113,9 @@ def verify_detail(request: Request, serial: str) -> HTMLResponse:
 def verify_bundle(serial: str) -> dict[str, object]:
     verdict = deps.get_verification(serial)
     payload = verdict.model_dump()
-    payload["_demo_notice"] = "DEMO DATA — replaceable mock proof bundle."
+    payload["_demo_notice"] = (
+        "DEMO DATA — replaceable mock proof bundle."
+        if config.is_demo()
+        else "LIVE CHAIN DATA — Besu QBFT anchored proof bundle."
+    )
     return payload

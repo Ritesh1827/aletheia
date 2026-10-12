@@ -2,13 +2,18 @@
 
 from __future__ import annotations
 
+from app import config
 from app.models.operations import ActionLogEntry, IncidentDetail, OverviewData
 from app.models.verify import VerificationVerdict
-from app.services import mock_operations, mock_verify
+from app.services import chain_api, mock_operations, mock_verify
+
+_DEMO_SERIALS = {"TT-DEMO-0001", "TT-DEMO-0002", "TT-DEMO-ERR"}
 
 
 def get_verification(serial: str) -> VerificationVerdict:
-    return mock_verify.verify_serial(serial)
+    if config.is_demo() or serial.strip().upper() in _DEMO_SERIALS:
+        return mock_verify.verify_serial(serial)
+    return chain_api.verify_serial(serial)
 
 
 def get_overview(severity: str = "all", status: str = "all", fail: bool = False) -> OverviewData:
