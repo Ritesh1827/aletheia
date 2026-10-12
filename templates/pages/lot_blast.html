@@ -16,7 +16,7 @@
 {%- endmacro %}
 {% block content %}
 <nav class="crumbs reveal" aria-label="Breadcrumb">
-  <a href="/lots">06 · Lots</a><span aria-hidden="true">/</span><a href="/lots/{{ lot.lot_id }}" class="mono">{{ lot.lot_id }}</a><span aria-hidden="true">/</span><span>blast-radius</span>
+  <a href="/lots">Lots</a><span aria-hidden="true">/</span><a href="/lots/{{ lot.lot_id }}" class="mono">{{ lot.lot_id }}</a><span aria-hidden="true">/</span><span>blast-radius</span>
 </nav>
 
 <section class="decision {% if blast.completeness == 'unknown' %}neutral{% elif blast.completeness == 'partial' %}watch{% else %}good{% endif %} reveal reveal-1" aria-label="Blast radius summary">

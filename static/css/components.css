@@ -361,7 +361,6 @@
 .principle:first-child { border-left: 0; }
 .principle h4 { margin: 0 0 4px; font-family: var(--font-display); font-size: 14px; font-weight: 750; }
 .principle p { margin: 0; color: var(--text-secondary); font-size: 12.5px; line-height: 19px; }
-.principle .p-index { font-family: var(--font-mono); font-size: 11px; color: var(--accent); font-weight: 600; }
 
 .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
 .rail .action-row { flex-direction: column; align-items: stretch; margin-top: 0; }

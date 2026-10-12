@@ -151,16 +151,6 @@ a:hover { color: var(--accent); }
   top: 0;
   z-index: 20;
 }
-.topbar-index {
-  font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  border: 2px solid var(--line-strong);
-  border-radius: 2px;
-  padding: 4px 8px;
-  flex: none;
-}
 .searchbar { display: flex; gap: 8px; flex: 1; max-width: 460px; }
 .searchbar input {
   flex: 1;
@@ -301,7 +291,6 @@ a:hover { color: var(--accent); }
   .content { padding: 20px 14px 60px; }
   .account .who { display: none; }
   .env-pill { display: none; }
-  .topbar-index { display: none; }
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -4,7 +4,7 @@
 {% block title %}{{ v.serial }} · Verify · TrustTrace{% endblock %}
 {% block content %}
 <nav class="crumbs reveal" aria-label="Breadcrumb">
-  <a href="/verify">01 · Verify</a><span aria-hidden="true">/</span><span class="mono">{{ v.serial }}</span>
+  <a href="/verify">Verify</a><span aria-hidden="true">/</span><span class="mono">{{ v.serial }}</span>
 </nav>
 
 {% set tone = 'good' if v.verdict == 'VERIFIED' else ('watch' if v.verdict == 'SUSPICIOUS' else ('critical' if v.verdict in ['CLONE_DETECTED','TAMPERED','RECALLED'] else 'neutral')) %}

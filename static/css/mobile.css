@@ -275,6 +275,24 @@
   .blast-card { padding: 10px 12px; }
   .blast-card .btn { min-height: 44px; margin-top: 6px; }
   .lot-list li, .check-list li { font-size: 13.5px; }
+
+  /* de-boxed: thin borders, soft shadows, no hard offsets or giant numerals */
+  .decision-index { display: none; }
+  .decision { border-width: 1px; box-shadow: 0 1px 3px rgba(19, 19, 17, 0.12); }
+  .decision-body { padding: 16px; }
+  .btn.primary, .btn.secondary, .btn.outline, .btn.danger { border-width: 1px; }
+  .btn.primary, .btn.secondary { box-shadow: 0 1px 2px rgba(19, 19, 17, 0.18); }
+  .btn.primary:active, .btn.secondary:active { box-shadow: none; }
+  .cmd-search { border-width: 1px; box-shadow: 0 1px 3px rgba(19, 19, 17, 0.12); }
+  .check, .finding, .scenario, .vs-card, .hashrow, .scan-card, .verify-dock,
+  .badge, .chip, .stat-pill, .seg-group, .icon-btn, .metric-grid, .table-wrap { border-width: 1px; }
+  .scan-card, .verify-dock { box-shadow: 0 6px 18px -8px rgba(19, 19, 17, 0.35); }
+  table.queue tbody tr { border-width: 1px; box-shadow: 0 1px 2px rgba(19, 19, 17, 0.12); }
+  .metric, .principle { border-width: 0; border-top: 1px solid var(--line); }
+  .metric:nth-child(odd) { border-right: 1px solid var(--line-strong); }
+  .principle { border-left: 0; }
+  .metric:first-child, .principle:first-child { border-top: 0; }
+  .queue-filters select, .searchbar--mobile input { border-width: 1px; }
 }
 
 @media (min-width: 901px) {
