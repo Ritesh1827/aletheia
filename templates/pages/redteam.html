@@ -16,14 +16,14 @@
 </div>
 {% else %}
 
-<section class="panel hero reveal reveal-1" aria-label="Red-Team Lab">
+<section class="panel hero archive reveal reveal-1" aria-label="Red-Team Lab">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Simulated attacks · demo data only</span>
+    <span class="eyebrow">Adversarial file · simulated attacks · demo data only</span>
   </div>
-  <h1>Break it <em>safely</em> here.</h1>
-  <p class="lede">Six attack scenarios against the demo trust fabric — no production system is touched, no real backend is under attack. Each run evaluates deterministic demo rules against your inputs and shows its work: triggered rules, evidence refs, and links to the affected serial, case, and anchor.</p>
-  <p class="hint" style="margin:0">Demo gate: execution is allowed because this session is a read-only demo with no backend writes. RBAC UI arrives later; the server must still authorize every privileged action independently.</p>
+  <h1>Red-Team Lab</h1>
+  <p class="lede">Six attack scenarios against the demo trust fabric. Each run evaluates deterministic demo rules and files its findings below — no production system is touched.</p>
+  <p class="hint" style="margin:0">Demo gate: execution is allowed because this session is a read-only demo with no backend writes. The server must still authorize every privileged action independently.</p>
 </section>
 
 {% if form_error %}

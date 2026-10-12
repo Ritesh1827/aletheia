@@ -17,13 +17,13 @@
 </div>
 {% else %}
 
-<section class="panel hero reveal reveal-1" aria-label="Tower status">
+<section class="panel hero archive reveal reveal-1" aria-label="Tower status">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Shift status · updated {{ data.updated_at }} · demo data</span>
+    <span class="eyebrow">Shift log · updated {{ data.updated_at }} · demo data</span>
   </div>
-  <h1>What needs <em>attention</em> right now?</h1>
-  <p class="lede">Two critical cases share one contested serial. Everything below is a mock operations feed — open a case to see its evidence, or verify the serial directly.</p>
+  <h1>Control Tower</h1>
+  <p class="lede">Two critical cases share one contested serial. Open a case for its evidence, or verify the serial directly.</p>
   <div class="metric-grid">
     {% for m in data.metrics %}
     <a class="metric" href="{{ m.link }}">

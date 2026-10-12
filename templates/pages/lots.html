@@ -23,13 +23,13 @@
 </div>
 {% endif %}
 
-<section class="panel hero reveal reveal-1" aria-label="Lot inventory">
+<section class="panel hero archive reveal reveal-1" aria-label="Lot inventory">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Inventory · {{ total }} lots · demo data</span>
+    <span class="eyebrow">Inventory ledger · {{ total }} lots · demo data</span>
   </div>
-  <h1>Which lots are <em>exposed?</em></h1>
-  <p class="lede">Committed lots, their anchors, open cases, and freeze state. Quantities below are committed demo figures — only observed units carry evidence.</p>
+  <h1>Lot inventory &amp; recall desk</h1>
+  <p class="lede">Committed lots, their anchors, open cases, and freeze state. Only observed units carry evidence.</p>
   <form action="/lots" method="get" x-data="{ value: '{{ q | e }}' }">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>

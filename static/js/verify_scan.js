@@ -14,6 +14,7 @@
     var stopBtn = $("scan-stop");
     var useBtn = $("scan-use");
     var closeBtn = $("scan-close");
+    var closeX = $("scan-close-x");
     var statusEl = $("scan-status");
     var decodedBox = $("scan-decoded");
     var decodedValue = $("scan-decoded-value");
@@ -146,6 +147,7 @@
 
     openBtn.addEventListener("click", showModal);
     closeBtn.addEventListener("click", hideModal);
+    if (closeX) closeX.addEventListener("click", hideModal);
     startBtn.addEventListener("click", startCamera);
     stopBtn.addEventListener("click", function () { stopCamera(false); });
     useBtn.addEventListener("click", useDecoded);
