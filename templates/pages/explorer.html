@@ -24,10 +24,10 @@
   </div>
   <h1>Provenance Explorer</h1>
   <p class="lede">Inspect anchored supply-chain evidence, not token prices.</p>
-  <form action="/explorer/search" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true">
+  <form action="/explorer/search" method="get" x-data="{ busy: false }" @submit="busy = true">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="explorer-q" name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+      <input id="explorer-q" name="q" value="{{ q }}" type="text" autocomplete="off" spellcheck="false"
              placeholder="Block height, tx hash, root, lot, serial, or address" aria-label="Explorer search" required minlength="2" />
       <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Search</button>
     </div>

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
@@ -126,8 +128,10 @@ async def redteam_run(request: Request, scenario_id: str) -> Response:
             status_code=404,
         )
     form = await request.form()
-    inputs = {k: str(v) for k, v in form.items() if k != "ran"}
-    ran = str(form.get("ran", ""))
+    allowed = {f.name for f in deps.get_redteam_lab().fields.get(key, [])}
+    inputs = {k: str(v)[:500] for k, v in form.items()
+              if k != "ran" and k in allowed}
+    ran = str(form.get("ran", ""))[:500]
     try:
         result = deps.run_redteam_scenario(key, inputs)
     except InvalidScenarioInputError as exc:
@@ -145,7 +149,7 @@ async def redteam_run(request: Request, scenario_id: str) -> Response:
     seen = [s for s in ran.split(",") if s in SCENARIO_IDS] if ran else []
     if key not in seen:
         seen.append(key)
-    params = "&".join(f"{k}={v}" for k, v in inputs.items())
+    params = urlencode(inputs)
     tail = f"&{params}" if params else ""
     return RedirectResponse(
         url=f"/red-team/{key}?ran={','.join(seen)}&result=1{tail}",

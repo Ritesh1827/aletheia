@@ -94,7 +94,7 @@ def incident_export(incident_id: str) -> Response:
 
 @router.post("/incidents/{incident_id}/actions", include_in_schema=False)
 def incident_action(request: Request, incident_id: str, action: str = Query(default="note"),
-                    note: str = Query(default="")) -> Response:
+                    note: str = Query(default="", max_length=500)) -> Response:
     try:
         entry = deps.record_incident_action(incident_id, action, note=note)
     except UnknownIncidentError:

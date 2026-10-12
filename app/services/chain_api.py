@@ -60,7 +60,10 @@ def _get(path: str) -> dict:
         raise UnknownSerialError(path)
     if r.status_code >= 500:
         raise ChainUnavailableError(correlation_id=f"chain-{r.status_code}")
-    r.raise_for_status()
+    if r.status_code >= 400:
+        # Backend rejection (bad input, throttled, any other 4xx): render the
+        # honest error page, never a 500 and never an all-clear.
+        raise ChainUnavailableError(correlation_id=f"chain-{r.status_code}")
     return r.json()
 
 
@@ -71,6 +74,9 @@ def _short(ref: str) -> str:
 def verify_serial(serial: str) -> VerificationVerdict:
     """Fetch live verdict + bundle + anchor, map to UI models."""
     key = serial.strip()
+    if not key or len(key) > 128:
+        # Matches the backend's serial cap: reject locally, no backend hit.
+        raise UnknownSerialError(serial=key[:128])
     try:
         v = _get(f"/products/{key}/verify")
     except UnknownSerialError:

@@ -91,8 +91,8 @@ def lot_blast_radius(request: Request, lot_id: str) -> HTMLResponse:
 @router.post("/lots/{lot_id}/freeze", include_in_schema=False)
 async def lot_freeze(request: Request, lot_id: str) -> Response:
     form = await request.form()
-    reason = str(form.get("reason", ""))
-    confirmed = str(form.get("confirm", ""))
+    reason = str(form.get("reason", ""))[:500]
+    confirmed = str(form.get("confirm", ""))[:128]
     if confirmed != lot_id.strip().upper():
         return templates.TemplateResponse(
             request,
@@ -120,8 +120,8 @@ async def lot_freeze(request: Request, lot_id: str) -> Response:
 @router.post("/lots/{lot_id}/recall", include_in_schema=False)
 async def lot_recall(request: Request, lot_id: str) -> Response:
     form = await request.form()
-    reason = str(form.get("reason", ""))
-    confirmed = str(form.get("confirm", ""))
+    reason = str(form.get("reason", ""))[:500]
+    confirmed = str(form.get("confirm", ""))[:128]
     if confirmed != lot_id.strip().upper():
         return templates.TemplateResponse(
             request,

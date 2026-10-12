@@ -30,10 +30,10 @@
   </div>
   <h1>Which lots are <em>exposed?</em></h1>
   <p class="lede">Committed lots, their anchors, open cases, and freeze state. Quantities below are committed demo figures — only observed units carry evidence.</p>
-  <form action="/lots" method="get" x-data="{ value: '{{ q | e }}' }">
+  <form action="/lots" method="get">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+      <input name="q" type="text" autocomplete="off" spellcheck="false"
              placeholder="Search lot ID or product" aria-label="Lot search" value="{{ q | e }}" />
       <button class="btn primary" type="submit">Search</button>
     </div>

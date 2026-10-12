@@ -12,10 +12,10 @@
   </div>
   <h1>Search the <em>anchor index</em></h1>
   <p class="lede">Block height or hash, transaction hash, Merkle root, lot ID, serial, or actor address.</p>
-  <form action="/explorer/search" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true">
+  <form action="/explorer/search" method="get" x-data="{ busy: false }" @submit="busy = true">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+      <input name="q" type="text" autocomplete="off" spellcheck="false"
              placeholder="e.g. 1845517, LOT-DEMO-A, TT-DEMO-0002" aria-label="Explorer search" value="{{ q | e }}" required minlength="2" />
       <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Search</button>
     </div>

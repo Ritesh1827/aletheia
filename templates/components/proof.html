@@ -14,24 +14,24 @@
   <dl class="kv kv-tight" style="margin-top:12px">
     <dt>Leaf event hash</dt>
     <dd>
-      <div class="hashrow">
+      <div class="hashrow" data-copy="{{ proof.leaf }}">
         <span class="val">{{ proof.leaf[:14] }}…{{ proof.leaf[-8:] }}</span>
-        <button class="btn ghost icon" type="button" @click="copyText('{{ proof.leaf }}', $el)" aria-label="Copy leaf hash">Copy</button>
+        <button class="btn ghost icon" type="button" @click="copyText($el.closest('.hashrow').dataset.copy, $el)" aria-label="Copy leaf hash">Copy</button>
       </div>
     </dd>
     <dt>Expected root</dt>
     <dd>
-      <div class="hashrow">
+      <div class="hashrow" data-copy="{{ proof.expected_root }}">
         <span class="val">{{ proof.expected_root[:14] }}…{{ proof.expected_root[-8:] }}</span>
-        <button class="btn ghost icon" type="button" @click="copyText('{{ proof.expected_root }}', $el)" aria-label="Copy expected root">Copy</button>
+        <button class="btn ghost icon" type="button" @click="copyText($el.closest('.hashrow').dataset.copy, $el)" aria-label="Copy expected root">Copy</button>
       </div>
     </dd>
     {% if proof.computed_root %}
     <dt>Computed root</dt>
     <dd>
-      <div class="hashrow">
+      <div class="hashrow" data-copy="{{ proof.computed_root }}">
         <span class="val">{{ proof.computed_root[:14] }}…{{ proof.computed_root[-8:] }}</span>
-        <button class="btn ghost icon" type="button" @click="copyText('{{ proof.computed_root }}', $el)" aria-label="Copy computed root">Copy</button>
+        <button class="btn ghost icon" type="button" @click="copyText($el.closest('.hashrow').dataset.copy, $el)" aria-label="Copy computed root">Copy</button>
       </div>
     </dd>
     {% endif %}

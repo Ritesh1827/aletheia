@@ -32,10 +32,10 @@
   </div>
   <h1>Is this unit <em>what it claims</em> to be?</h1>
   <p class="lede">Paste a raw QR payload or type the printed serial. The desk checks lot commitment, chain integrity, actor authorization, custody order, and movement plausibility — then shows its work. Every figure on this screen is <strong>demo data</strong>.</p>
-  <form action="/verify" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true">
+  <form action="/verify" method="get" x-data="{ busy: false }" @submit="busy = true">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="serial" name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+      <input id="serial" name="q" value="{{ q }}" type="text" autocomplete="off" spellcheck="false"
              placeholder="Scan or paste serial — e.g. TT-DEMO-0001" aria-label="Serial or QR payload" required minlength="4" />
       <span class="kbd" aria-hidden="true">⏎</span>
       <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Verify</button>
