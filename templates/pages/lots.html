@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+{% block title %}Lots & Recall · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">06 · Lots &amp; Recall</p>
+</header>
+
+{% if load_error %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div>
+    <strong>Lot inventory unavailable.</strong>
+    <p>The inventory feed could not be read — this is not an all-clear. Correlation ID: <span class="mono">{{ load_error }}</span>.</p>
+    <div class="action-row"><a class="btn secondary" href="/lots">Retry load</a></div>
+  </div>
+</div>
+{% else %}
+
+{% if not_found %}
+<div class="alert warn reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div><strong>Unknown lot — “{{ not_found }}”.</strong><p>No lot matches in the demo set. The inventory below is complete.</p></div>
+</div>
+{% endif %}
+
+<section class="panel hero reveal reveal-1" aria-label="Lot inventory">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Inventory · {{ total }} lots · demo data</span>
+  </div>
+  <h1>Which lots are <em>exposed?</em></h1>
+  <p class="lede">Committed lots, their anchors, open cases, and freeze state. Quantities below are committed demo figures — only observed units carry evidence.</p>
+  <form action="/lots" method="get" x-data="{ value: '{{ q | e }}' }">
+    <div class="cmd-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Search lot ID or product" aria-label="Lot search" value="{{ q | e }}" />
+      <button class="btn primary" type="submit">Search</button>
+    </div>
+    <input type="hidden" name="freeze" value="{{ freeze }}" />
+  </form>
+  <form class="queue-filters" action="/lots" method="get" aria-label="Filter lots">
+    <input type="hidden" name="q" value="{{ q | e }}" />
+    <label>Freeze state
+      <select name="freeze" onchange="this.form.submit()">
+        {% for opt in ['all','active','frozen'] %}
+        <option value="{{ opt }}" {% if freeze == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <a class="btn ghost" href="/lots">Clear</a>
+  </form>
+</section>
+
+<section class="panel reveal reveal-2" aria-label="Lot inventory table">
+  <p class="eyebrow">Lots · {{ lots | length }} of {{ total }} · page {{ page }} of {{ pages }}</p>
+  {% if lots %}
+  <div class="table-wrap" role="region" aria-label="Lots table" tabindex="0">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Lot</th><th scope="col">Product</th><th scope="col">Committed</th><th scope="col">Anchor</th><th scope="col">Freeze</th><th scope="col">Recall</th><th scope="col">Open cases</th></tr>
+      </thead>
+      <tbody>
+        {% for l in lots %}
+        <tr>
+          <td><a class="mono" href="/lots/{{ l.lot_id }}">{{ l.lot_id }}</a></td>
+          <td>{{ l.product }}</td>
+          <td>{{ l.committed_qty }}</td>
+          <td>{{ l.anchor_state }}</td>
+          <td>{% if l.freeze_state == 'frozen' %}<span class="stat-pill s-open">frozen</span>{% else %}<span class="stat-pill">active</span>{% endif %}</td>
+          <td>{% if l.recall_state == 'recalled' %}<span class="stat-pill i-fail">recalled</span>{% else %}<span class="stat-pill">none</span>{% endif %}</td>
+          <td>{{ l.incidents_open }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="action-row">
+    {% if page > 1 %}
+    <a class="btn outline" href="/lots?q={{ q | urlencode }}&freeze={{ freeze }}&page={{ page - 1 }}">← Newer</a>
+    {% endif %}
+    {% if page < pages %}
+    <a class="btn outline" href="/lots?q={{ q | urlencode }}&freeze={{ freeze }}&page={{ page + 1 }}">Older →</a>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="alert info" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+    <div><strong>No lots match.</strong><p>Loosen the search or freeze filter — an empty result means “no matches”, never “nothing at risk”.</p></div>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

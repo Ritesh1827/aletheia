@@ -10,10 +10,11 @@ from app.models.explorer import (
     SearchHit,
     TxDetails,
 )
+from app.models.lots import BlastRadius, LotAuditEntry, LotDetail, LotSummary
 from app.models.operations import ActionLogEntry, IncidentDetail, OverviewData
 from app.models.redteam import RedTeamLab, ScenarioResult
 from app.models.verify import VerificationVerdict
-from app.services import mock_explorer, mock_operations, mock_redteam, mock_verify
+from app.services import mock_explorer, mock_lots, mock_operations, mock_redteam, mock_verify
 
 
 def get_verification(serial: str) -> VerificationVerdict:
@@ -67,3 +68,23 @@ def get_redteam_lab(run_state: dict[str, bool] | None = None) -> RedTeamLab:
 
 def run_redteam_scenario(scenario_id: str, inputs: dict[str, str]) -> ScenarioResult:
     return mock_redteam.run_scenario(scenario_id, inputs)
+
+
+def list_lots(query: str = "", freeze: str = "all", fail: bool = False) -> list[LotSummary]:
+    return mock_lots.list_lots(query=query, freeze=freeze, fail=fail)
+
+
+def get_lot(lot_id: str) -> LotDetail:
+    return mock_lots.get_lot(lot_id)
+
+
+def get_blast_radius(lot_id: str) -> BlastRadius:
+    return mock_lots.get_blast_radius(lot_id)
+
+
+def freeze_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
+    return mock_lots.freeze_lot(lot_id, reason)
+
+
+def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
+    return mock_lots.recall_lot(lot_id, reason)

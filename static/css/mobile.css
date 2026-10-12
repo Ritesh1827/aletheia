@@ -189,7 +189,7 @@
   /* bottom tab bar */
   .tabbar {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
-    display: grid; grid-template-columns: repeat(5, 1fr);
+    display: grid; grid-template-columns: repeat(6, 1fr);
     background: var(--surface-1);
     border-top: 2px solid var(--line-strong);
     padding-bottom: env(safe-area-inset-bottom);
@@ -197,12 +197,13 @@
   }
   .tabbar a {
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 3px; min-height: var(--tabbar-h);
+    gap: 3px; min-height: var(--tabbar-h); min-width: 0;
     color: var(--text-secondary); text-decoration: none;
-    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
-    border-top: 3px solid transparent;
+    font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    border-top: 3px solid transparent; padding: 6px 2px;
   }
-  .tabbar a svg { width: 20px; height: 20px; }
+  .tabbar a span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+  .tabbar a svg { width: 20px; height: 20px; flex: none; }
   .tabbar a[aria-current="page"] { color: var(--text-primary); border-top-color: var(--accent); background: var(--surface-2); }
   .tabbar a:active { background: var(--surface-2); }
 
@@ -237,6 +238,24 @@
   .footer-note { font-size: 11.5px; }
   .toast-slot { left: 12px; right: 12px; bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 12px); }
   .toast { min-width: 0; max-width: none; }
+
+  /* scanner modal -> bottom sheet on mobile */
+  .scan-modal { padding: 12px 12px calc(12px + var(--tabbar-h) + env(safe-area-inset-bottom)); align-items: flex-end; }
+  .scan-card { max-width: 100%; padding: 16px; box-shadow: 4px 4px 0 var(--line-strong); max-height: calc(100dvh - var(--tabbar-h) - 32px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  .scan-frame { min-height: 200px; }
+  .scan-frame::after { inset: 16px 20px; }
+  .scan-card .action-row .btn { flex: 1 1 100%; min-height: 48px; }
+  #scan-camera { min-height: 44px; font-size: 16px; }
+
+  /* verify cmd-search with Scan button: stack full-width CTAs */
+  #verify-form .cmd-search .btn { flex: 1 1 45%; }
+  #verify-form .cmd-search .btn.primary { flex: 1 1 100%; order: 3; }
+
+  /* lots & blast radius */
+  .blast-tree { margin: 12px 0 0; padding-left: 14px; }
+  .blast-card { padding: 10px 12px; }
+  .blast-card .btn { min-height: 44px; margin-top: 6px; }
+  .lot-list li, .check-list li { font-size: 13.5px; }
 }
 
 @media (min-width: 901px) {

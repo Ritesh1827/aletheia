@@ -1,0 +1,176 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ lot.lot_id }} · Lot · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/lots">06 · Lots</a><span aria-hidden="true">/</span><span class="mono">{{ lot.lot_id }}</span>
+</nav>
+
+{% if flash %}
+<div class="alert info reveal" role="status">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+  <div><strong>Demo action recorded.</strong><p>{{ flash.text }}</p></div>
+</div>
+{% endif %}
+{% if form_error %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div><strong>Action not taken.</strong><p>{{ form_error }}</p></div>
+</div>
+{% endif %}
+
+{% set tone = 'critical' if lot.recall_state == 'recalled' else ('watch' if lot.freeze_state == 'frozen' else 'neutral') %}
+<section class="decision {{ tone }} reveal reveal-1" aria-label="Lot summary">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ lot.committed_qty }}</div>
+    <div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        {% if lot.freeze_state == 'frozen' %}<span class="badge watch"><span class="dot" aria-hidden="true"></span>FROZEN</span>
+        {% else %}<span class="badge good"><span class="dot" aria-hidden="true"></span>ACTIVE</span>{% endif %}
+        {% if lot.recall_state == 'recalled' %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>RECALLED</span>{% endif %}
+      </div>
+      <div class="decision-code">{{ lot.lot_id }}</div>
+      <div class="decision-label">{{ lot.product }} · {{ lot.committed_qty }} committed · {{ lot.lifecycle }} · demo data</div>
+      <p class="decision-expl">Permitted custodians: {{ lot.permitted_custodians | join(', ') }}. State below reflects confirmed demo-service results only — no real inventory or partners have been notified.</p>
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Lot · observed units</p>
+      <h3>Recorded products</h3>
+      {% if lot.products %}
+      <div class="table-wrap" role="region" aria-label="Lot products" tabindex="0">
+        <table class="queue">
+          <thead><tr><th scope="col">Serial</th><th scope="col">Status</th><th scope="col">Custodian</th><th scope="col">Sale</th></tr></thead>
+          <tbody>
+            {% for p in lot.products %}
+            <tr>
+              <td><a class="mono" href="/verify/{{ p.serial }}">{{ p.serial }}</a></td>
+              <td>{{ p.status }}</td>
+              <td>{{ p.custodian }}</td>
+              <td>{{ p.sale_state }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="hint" style="margin:10px 0 0">Observed units only. The remainder of the committed quantity has no demo records — see blast radius.</p>
+      {% else %}
+      <div class="alert info" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+        <div><strong>No product-level records.</strong><p>This lot has no observed units in the demo set. Its batch is still pending anchor.</p></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Lot · cases</p>
+      <h3>Associated incidents</h3>
+      {% if lot.incidents %}
+      <ul class="lot-list">
+        {% for i in lot.incidents %}
+        <li>
+          <span><a class="mono" href="/incidents/{{ i.id }}">{{ i.id }}</a> · {{ i.severity }}</span>
+          <span>{{ i.summary }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="hint" style="margin:0">No incidents reference this lot in the demo set.</p>
+      {% endif %}
+    </div>
+
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Lot · anchors</p>
+      <h3>Anchor status</h3>
+      <ul class="lot-list">
+        {% for a in lot.anchors %}
+        <li>
+          <span class="mono">{{ a.anchor_id }} · {{ a.state }}</span>
+          <span>{% if a.block %}block <a class="mono" href="/explorer/block/{{ a.block }}">{{ a.block }}</a> · {% endif %}{% if a.tx_hash %}<a class="mono" href="/explorer/tx/{{ a.tx_hash }}">tx →</a> · {% endif %}{{ a.event_count }} events{% if a.root %} · root {{ a.root[:10] }}…{{ a.root[-6:] }}{% else %} · root pending{% endif %}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="panel reveal reveal-3">
+      <p class="eyebrow">Lot · audit</p>
+      <h3>Action audit trail</h3>
+      {% if lot.audit %}
+      <ul class="case-log">
+        {% for a in lot.audit %}
+        <li><span class="mono">{{ a.at }} · {{ a.actor }}</span>{{ a.action }} — {{ a.outcome }}{% if a.reason %} ({{ a.reason }}){% endif %}</li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="hint" style="margin:0">No freeze or recall actions recorded for this lot in this demo session.</p>
+      {% endif %}
+      <div class="action-row"><a class="btn ghost" href="/lots/{{ lot.lot_id }}/audit" download="audit-{{ lot.lot_id }}.json">Download audit JSON</a></div>
+    </div>
+  </div>
+
+  <aside class="rail reveal reveal-2" aria-label="Lot actions">
+    <div class="panel">
+      <p class="eyebrow">Lot · trace</p>
+      <h3>Blast radius</h3>
+      <p class="hint">Lot → observed units → custodians → cases. Partial demo data, honestly labelled.</p>
+      <div class="action-row">
+        <a class="btn secondary" href="/lots/{{ lot.lot_id }}/blast-radius">Open blast radius →</a>
+        <a class="btn ghost" href="/lots">← All lots</a>
+      </div>
+    </div>
+    <div class="panel" x-data="{ confirmFreeze: false, confirmRecall: false }">
+      <p class="eyebrow">Lot · act (demo)</p>
+      <h3>Freeze &amp; recall</h3>
+      <p class="hint">Demo operations only. State changes after the service confirms; repeats are idempotent.</p>
+      <form action="/lots/{{ lot.lot_id }}/freeze" method="post" x-show="!confirmFreeze">
+        <div class="action-row">
+          <button class="btn outline" type="button" @click="confirmFreeze = true" {% if lot.freeze_state == 'frozen' %}disabled aria-disabled="true" title="Already frozen — repeat confirmations are recorded as idempotent"{% endif %}>
+            {% if lot.freeze_state == 'frozen' %}Frozen ✓{% else %}Freeze lot…{% endif %}
+          </button>
+        </div>
+      </form>
+      <form action="/lots/{{ lot.lot_id }}/freeze" method="post" x-show="confirmFreeze" x-cloak>
+        <p><strong>Freeze {{ lot.lot_id }}?</strong> Outbound transfer will be held (demo operation). Type the lot ID to confirm.</p>
+        <div class="field" style="margin-bottom:10px">
+          <label for="fz-confirm">Confirm lot ID</label>
+          <input id="fz-confirm" name="confirm" type="text" autocomplete="off" placeholder="{{ lot.lot_id }}" required />
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label for="fz-reason">Reason (optional)</label>
+          <input id="fz-reason" name="reason" type="text" autocomplete="off" placeholder="Investigator hold…" />
+        </div>
+        <div class="action-row">
+          <button class="btn primary" type="submit">Confirm freeze</button>
+          <button class="btn ghost" type="button" @click="confirmFreeze = false">Cancel</button>
+        </div>
+      </form>
+      <form action="/lots/{{ lot.lot_id }}/recall" method="post" x-show="!confirmRecall" style="margin-top:10px">
+        <div class="action-row">
+          <button class="btn danger" type="button" @click="confirmRecall = true" {% if lot.recall_state == 'recalled' %}disabled aria-disabled="true" title="Already recalled — repeat confirmations are recorded as idempotent"{% endif %}>
+            {% if lot.recall_state == 'recalled' %}Recalled ✓{% else %}Recall lot…{% endif %}
+          </button>
+        </div>
+      </form>
+      <form action="/lots/{{ lot.lot_id }}/recall" method="post" x-show="confirmRecall" x-cloak style="margin-top:10px">
+        <p><strong>Recall {{ lot.lot_id }}?</strong> Pull-stock queues and the lot freezes (demo operation — no real partners notified). Type the lot ID to confirm.</p>
+        <div class="field" style="margin-bottom:10px">
+          <label for="rc-confirm">Confirm lot ID</label>
+          <input id="rc-confirm" name="confirm" type="text" autocomplete="off" placeholder="{{ lot.lot_id }}" required />
+        </div>
+        <div class="field" style="margin-bottom:10px">
+          <label for="rc-reason">Reason (optional)</label>
+          <input id="rc-reason" name="reason" type="text" autocomplete="off" placeholder="Clone conflict…" />
+        </div>
+        <div class="action-row">
+          <button class="btn danger" type="submit">Confirm recall</button>
+          <button class="btn ghost" type="button" @click="confirmRecall = false">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}
