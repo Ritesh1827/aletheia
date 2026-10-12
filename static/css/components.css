@@ -511,6 +511,27 @@
 .scenario p { margin: 0 0 8px; color: var(--text-secondary); font-size: 13px; line-height: 20px; }
 .scenario .hint { margin: 0 0 4px; }
 
+.blast-tree { list-style: none; margin: 14px 0 0; padding: 0; }
+.blast-tree .blast-tree { margin: 10px 0 0 18px; padding-left: 16px; border-left: 2px solid var(--line-strong); }
+.blast-node { margin-bottom: 10px; }
+.blast-node:last-child { margin-bottom: 0; }
+.blast-card {
+  border: 1.5px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--surface-1);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+.blast-card span { color: var(--text-secondary); font-size: 12.5px; }
+.blast-node.tone-critical > .blast-card { border-color: var(--accent); background: var(--accent-wash); }
+.blast-node.tone-watch > .blast-card { border-left-width: 5px; border-left-color: var(--signal-watch); }
+.blast-node.tone-good > .blast-card { border-left-width: 5px; border-left-color: var(--signal-good); }
+
+[x-cloak] { display: none !important; }
+
 @media (max-width: 640px) {
   .cmd-search input, .field input { font-size: 16px; }
 }

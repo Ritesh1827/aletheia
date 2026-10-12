@@ -1,4 +1,4 @@
-"""FastAPI application factory (M4: Verify + Overview + Incidents + Explorer + Red-Team)."""
+"""FastAPI application factory (M5: + Lots & Recall)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app import config
-from app.routes import explorer, operations, redteam, verify
+from app.routes import explorer, lots, operations, redteam, verify
 
 
 def create_app() -> FastAPI:
@@ -16,6 +16,7 @@ def create_app() -> FastAPI:
     app.include_router(operations.router)
     app.include_router(explorer.router)
     app.include_router(redteam.router)
+    app.include_router(lots.router)
     return app
 
 
