@@ -532,6 +532,53 @@
 
 [x-cloak] { display: none !important; }
 
+.scan-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(19, 19, 17, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 16px;
+  overflow-y: auto;
+}
+.scan-modal[hidden] { display: none; }
+.scan-card {
+  background: var(--surface-1);
+  border: 2px solid var(--line-strong);
+  border-radius: 3px;
+  box-shadow: 6px 6px 0 var(--line-strong);
+  max-width: 560px;
+  width: 100%;
+  padding: 22px 24px;
+}
+.scan-card .kicker { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.scan-frame {
+  margin-top: 12px;
+  border: 2px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--surface-2);
+  min-height: 240px;
+  position: relative;
+  overflow: hidden;
+}
+.scan-frame::after {
+  content: "";
+  position: absolute;
+  inset: 24px 32px;
+  border: 3px solid var(--accent);
+  border-radius: 2px;
+  pointer-events: none;
+}
+.scan-frame video, .scan-frame canvas { width: 100%; display: block; }
+.scan-status { font-size: 13px; font-weight: 600; color: var(--text-secondary); margin: 10px 0 0; }
+.scan-decoded { margin-top: 12px; border: 1.5px solid var(--line-strong); border-radius: 2px; padding: 10px 12px; background: var(--surface-2); }
+.scan-decoded[hidden] { display: none; }
+.scan-decoded .mono { overflow-wrap: anywhere; font-size: 13px; }
+#scan-cam-wrap { margin-top: 10px; }
+#scan-cam-wrap select { font-size: 14px; }
+
 @media (max-width: 640px) {
   .cmd-search input, .field input { font-size: 16px; }
 }
