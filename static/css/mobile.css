@@ -96,12 +96,12 @@
   .mono, .decision-code, .crumbs .mono, h3.mono { overflow-wrap: anywhere; word-break: break-word; }
 
   /* hero */
-  .hero { padding: 20px 16px 18px; }
-  .hero h1 { font-size: clamp(26px, 8.5vw, 34px); line-height: 1.08; max-width: 100%; }
+  .hero { padding: 18px 0 14px; }
+  .hero h1 { font-size: clamp(22px, 7vw, 27px); line-height: 1.15; max-width: 100%; }
   .hero .lede { font-size: 14px; line-height: 21px; }
   .cmd-search {
-    flex-wrap: wrap; padding: 8px;
-    gap: 8px; box-shadow: 4px 4px 0 var(--line-strong);
+    flex-wrap: wrap; padding: 6px;
+    gap: 8px;
   }
   .cmd-search svg { margin-left: 6px; }
   .cmd-search input { flex: 1 1 100%; min-height: 44px; font-size: 16px; padding: 8px 6px; }
@@ -177,8 +177,8 @@
   table.queue tbody { display: grid; gap: 10px; }
   table.queue tbody tr {
     background: var(--surface-1);
-    border: 1.5px solid var(--line-strong); border-radius: 2px;
-    padding: 6px 12px; box-shadow: 3px 3px 0 var(--line-strong);
+    border: 1px solid var(--line); border-radius: 2px;
+    padding: 6px 12px;
   }
   table.queue tbody tr:hover { background: var(--surface-1); }
   table.queue td { border: 0; padding: 8px 0; display: flex; gap: 10px; align-items: baseline; }

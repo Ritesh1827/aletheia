@@ -29,13 +29,13 @@
 </div>
 {% endif %}
 
-<section class="panel hero reveal reveal-1" aria-label="Serial lookup">
+<section class="panel hero archive reveal reveal-1" aria-label="Serial lookup">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Serial lookup</span>
+    <span class="eyebrow">Exhibit intake · serial lookup · demo data</span>
   </div>
-  <h1>Is this unit <em>what it claims</em> to be?</h1>
-  <p class="lede">Paste a raw QR payload or type the printed serial. The desk checks lot commitment, chain integrity, actor authorization, custody order, and movement plausibility — then shows its work. Every figure on this screen is <strong>demo data</strong>.</p>
+  <h1>Verify a serial against its history</h1>
+  <p class="lede">Paste a QR payload or type the printed serial. Five plausibility checks run against available records — then the verdict shows its work.</p>
   <form action="/verify" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true" id="verify-form">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -57,9 +57,12 @@
 
   <div class="scan-modal" id="scan-modal" role="dialog" aria-modal="true" aria-labelledby="scan-title" hidden>
     <div class="scan-card">
-      <div class="kicker">
-        <span class="rule-accent" aria-hidden="true"></span>
-        <span class="eyebrow" id="scan-title">Scan code · camera stays on this device</span>
+      <div class="scan-head">
+        <div class="kicker">
+          <span class="rule-accent" aria-hidden="true"></span>
+          <span class="eyebrow" id="scan-title">Scan code · camera stays on this device</span>
+        </div>
+        <button class="scan-close-x" type="button" id="scan-close-x" aria-label="Close scanner">✕</button>
       </div>
       <p class="hint">Supports QR, EAN-13, EAN-8, UPC-A, UPC-E and Code 128. The camera starts only after you press Start. No frames or photos leave this device — only the decoded text is used.</p>
       <div class="scan-frame" id="scan-region" aria-label="Camera preview"></div>
