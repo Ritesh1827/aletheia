@@ -38,6 +38,7 @@
       <p class="eyebrow">Evidence · checks</p>
       <h3>Check matrix</h3>
       <p class="hint">Five plausibility checks behind this verdict.</p>
+      <p class="carousel-hint" aria-hidden="true">Swipe sideways to compare checks →</p>
       <div class="check-grid">
         {% for c in v.checks %}
         <div class="check {{ c.status }}">
@@ -138,11 +139,19 @@
       <p class="eyebrow" style="margin-bottom:10px">Record · actions</p>
       <div class="action-row">
         <button class="btn secondary" type="button" data-copy="{{ v.serial }}" @click="copyText($el.dataset.copy, $el)">Copy serial</button>
+        <button class="btn outline" type="button" data-share data-share-title="{{ v.serial }} · TrustTrace verdict" data-share-text="{{ v.verdict }} — {{ verdict_label }}" data-share-url="/verify/{{ v.serial }}">Share verdict</button>
         <a class="btn outline" href="/verify/{{ v.serial }}/bundle" download="proof-{{ v.serial }}.json">Download proof bundle</a>
         <a class="btn ghost" href="#provenance">Open provenance ↓</a>
         <a class="btn ghost" href="/verify">Verify another serial →</a>
       </div>
     </div>
   </aside>
+</div>
+{% endblock %}
+{% block mobile_dock %}
+<div class="verify-dock" role="toolbar" aria-label="Verdict quick actions">
+  <button class="btn secondary" type="button" data-copy="{{ v.serial }}" @click="copyText($el.dataset.copy, $el)">Copy</button>
+  <a class="btn outline" href="#provenance">Timeline</a>
+  <a class="btn primary" href="/verify/{{ v.serial }}/bundle" download="proof-{{ v.serial }}.json">Proof</a>
 </div>
 {% endblock %}
