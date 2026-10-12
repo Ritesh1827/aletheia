@@ -1,0 +1,9 @@
+{% macro hashrow(value, label='hash') -%}
+<div class="hashrow" x-data="{ revealed: false }">
+  <span class="val" x-text="revealed ? '{{ value }}' : '{{ value[:14] }}…{{ value[-8:] }}'">{{ value[:14] }}…{{ value[-8:] }}</span>
+  <button class="btn ghost icon" type="button" @click="revealed = !revealed" :aria-pressed="revealed.toString()" aria-label="Toggle full {{ label }}">
+    <span x-text="revealed ? 'Hide' : 'Reveal'"></span>
+  </button>
+  <button class="btn ghost icon" type="button" @click="copyText('{{ value }}', $el)" aria-label="Copy full {{ label }}">Copy</button>
+</div>
+{%- endmacro %}

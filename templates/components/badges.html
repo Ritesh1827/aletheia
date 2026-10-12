@@ -1,0 +1,28 @@
+{% macro badge(tone, text) -%}
+<span class="badge {{ tone }}"><span class="dot" aria-hidden="true"></span>{{ text }}</span>
+{%- endmacro %}
+
+{% macro status_badge(verdict) -%}
+{% if verdict == 'VERIFIED' %}{{ badge('good', 'VERIFIED · History checks passed') }}
+{% elif verdict == 'SUSPICIOUS' %}{{ badge('watch', 'SUSPICIOUS · Needs review') }}
+{% elif verdict == 'CLONE_DETECTED' %}{{ badge('critical', 'CLONE DETECTED · Conflicting histories') }}
+{% elif verdict == 'TAMPERED' %}{{ badge('critical', 'TAMPERED · Integrity failed') }}
+{% elif verdict == 'RECALLED' %}{{ badge('critical', 'RECALLED · Lot recalled / frozen') }}
+{% else %}{{ badge('neutral', 'UNKNOWN · Not recognized') }}
+{% endif %}
+{%- endmacro %}
+
+{% macro severity_badge(sev) -%}
+{% if sev == 'critical' %}{{ badge('critical', 'CRITICAL') }}
+{% elif sev == 'watch' %}{{ badge('watch', 'WATCH') }}
+{% else %}{{ badge('info', 'INFO') }}
+{% endif %}
+{%- endmacro %}
+
+{% macro check_badge(status) -%}
+{% if status == 'pass' %}{{ badge('good', 'PASS') }}
+{% elif status == 'fail' %}{{ badge('critical', 'FAIL') }}
+{% elif status == 'warn' %}{{ badge('watch', 'WARN') }}
+{% else %}{{ badge('neutral', 'UNKNOWN') }}
+{% endif %}
+{%- endmacro %}

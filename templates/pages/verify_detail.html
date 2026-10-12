@@ -1,0 +1,148 @@
+{% extends "layouts/base.html" %}
+{% import "components/badges.html" as b %}
+{% import "components/hash.html" as h %}
+{% block title %}{{ v.serial }} · Verify · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/verify">01 · Verify</a><span aria-hidden="true">/</span><span class="mono">{{ v.serial }}</span>
+</nav>
+
+{% set tone = 'good' if v.verdict == 'VERIFIED' else ('watch' if v.verdict == 'SUSPICIOUS' else ('critical' if v.verdict in ['CLONE_DETECTED','TAMPERED','RECALLED'] else 'neutral')) %}
+{% set idx = '01' if v.verdict == 'VERIFIED' else ('02' if v.verdict == 'SUSPICIOUS' else ('03' if v.verdict in ['CLONE_DETECTED','TAMPERED','RECALLED'] else '00')) %}
+<section class="decision {{ tone }} reveal reveal-1" aria-label="Verdict">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ idx }}</div>
+    <div>
+      {{ b.status_badge(v.verdict) }}
+      <div class="decision-code">{{ v.verdict.replace('_', ' ') }}</div>
+      <div class="decision-label">{{ verdict_label }}</div>
+      <p class="decision-expl">{{ v.explanation }}</p>
+      <div class="risk-meter" aria-label="Risk score {{ v.risk_score }} of 100">
+        <span>Risk <span class="risk-num">{{ v.risk_score }}/100</span></span>
+        <span class="risk-bar"><i class="risk-fill" style="--w:{{ v.risk_score / 100 }}"></i></span>
+        <span class="risk-conf">{{ v.confidence }}</span>
+      </div>
+      {% if v.uncertainty %}<p class="uncert">Uncertainty: {{ v.uncertainty }}</p>{% endif %}
+      <p class="decision-caveat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <span>{{ caveat }}</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Evidence · checks</p>
+      <h3>Check matrix</h3>
+      <p class="hint">Five plausibility checks behind this verdict.</p>
+      <div class="check-grid">
+        {% for c in v.checks %}
+        <div class="check {{ c.status }}">
+          <h4><span class="pip" aria-hidden="true"></span>{{ c.label }}</h4>
+          <p>{{ c.detail }}</p>
+          <div style="margin-top:10px">{{ b.check_badge(c.status) }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Evidence · findings</p>
+      <h3>Evidence findings</h3>
+      <p class="hint">Rule-backed reasons with references and next steps.</p>
+      {% if v.findings %}
+        {% for f in v.findings %}
+        <article class="finding">
+          <div class="finding-head">
+            {{ b.severity_badge(f.severity) }}
+            <span class="rule">{{ f.rule_id }}</span>
+          </div>
+          <p><strong>Reason:</strong> {{ f.reason }}</p>
+          {% if f.references %}<p class="refs">refs: {{ f.references | join(', ') }}</p>{% endif %}
+          {% if f.uncertainty %}<p>Uncertainty: {{ f.uncertainty }}</p>{% endif %}
+          {% if f.next_step %}
+          <details>
+            <summary>Next step</summary>
+            <p>{{ f.next_step }}</p>
+          </details>
+          {% endif %}
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="alert info" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+          <div><strong>No adverse findings.</strong><p>Nothing in the available history contradicts this verdict.</p></div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="panel reveal reveal-3" id="provenance" x-data="{ filter: 'all' }">
+      <p class="eyebrow">Evidence · custody log</p>
+      <h3>Provenance timeline</h3>
+      <p class="hint">Filled markers are custody transfers; outlined markers are observations.</p>
+      <div class="timeline-filters" role="group" aria-label="Timeline filter">
+        <div class="seg-group">
+          <button class="btn" type="button" :aria-pressed="(filter === 'all').toString()" @click="filter = 'all'">All</button>
+          <button class="btn" type="button" :aria-pressed="(filter === 'custody').toString()" @click="filter = 'custody'">Custody</button>
+          <button class="btn" type="button" :aria-pressed="(filter === 'observation').toString()" @click="filter = 'observation'">Observations</button>
+        </div>
+      </div>
+      <ol class="timeline">
+        {% for e in v.timeline %}
+        <li class="{{ e.kind }}" x-show="filter === 'all' || filter === '{{ e.kind }}'">
+          <span class="t-time">{{ e.timestamp.split(' ')[1][:5] if ' ' in e.timestamp else '' }}</span>
+          <span class="t-kind">{{ e.kind }}</span>
+          <p class="t-sum">{{ e.summary }}</p>
+          <p class="t-meta"><span class="mono">{{ e.event_id }}</span> · {{ e.timestamp }} · {{ e.actor }}{% if e.location %} · {{ e.location }}{% endif %}</p>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    {% if v.proof %}
+    <div class="panel reveal reveal-3">
+      <p class="eyebrow">Evidence · anchor</p>
+      <h3>Proof bundle</h3>
+      <p class="hint">Anchor <span class="mono">{{ v.proof.anchor_id }}</span> · block <span class="mono">{{ v.proof.block_height }}</span> · {{ v.proof.leaf_count }} leaves · {{ v.proof.proof_status }} (verification runs against chain data, not in the browser)</p>
+      <dl class="kv" style="margin-bottom:12px">
+        <dt>Merkle root</dt><dd>{{ h.hashrow(v.proof.merkle_root, 'Merkle root') }}</dd>
+        <dt>Transaction</dt><dd>{{ h.hashrow(v.proof.transaction_hash, 'transaction hash') }}</dd>
+      </dl>
+      <div class="jsonviewer" tabindex="0" aria-label="Proof bundle JSON">{
+  <span class="k">"anchor"</span>: "{{ v.proof.anchor_id }}",
+  <span class="k">"root"</span>: "{{ v.proof.merkle_root }}",
+  <span class="k">"tx"</span>: "{{ v.proof.transaction_hash }}",
+  <span class="k">"block"</span>: {{ v.proof.block_height }},
+  <span class="k">"status"</span>: "{{ v.proof.proof_status }}"
+}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="rail reveal reveal-2" aria-label="Identity and actions">
+    <div class="panel">
+      <p class="eyebrow">Record · identity</p>
+      <h3 class="mono" style="margin:6px 0 12px; font-size:17px">{{ v.identity.serial }}</h3>
+      <dl class="kv">
+        <dt>Lot</dt><dd class="mono">{{ v.identity.lot_id }}</dd>
+        <dt>Product</dt><dd>{{ v.identity.product }}</dd>
+        <dt>Lifecycle</dt><dd>{{ v.identity.lifecycle_status }}</dd>
+        <dt>Custodian</dt><dd>{{ v.identity.permitted_custodian }}</dd>
+        <dt>Retrieved</dt><dd class="mono" style="font-size:11.5px">{{ v.retrieved_at }}</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <p class="eyebrow" style="margin-bottom:10px">Record · actions</p>
+      <div class="action-row">
+        <button class="btn secondary" type="button" data-copy="{{ v.serial }}" @click="copyText($el.dataset.copy, $el)">Copy serial</button>
+        <a class="btn outline" href="/verify/{{ v.serial }}/bundle" download="proof-{{ v.serial }}.json">Download proof bundle</a>
+        <a class="btn ghost" href="#provenance">Open provenance ↓</a>
+        <a class="btn ghost" href="/verify">Verify another serial →</a>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

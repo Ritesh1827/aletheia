@@ -1,0 +1,74 @@
+{% extends "layouts/base.html" %}
+{% block title %}Verify Product · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">01 · Serial verification</p>
+</header>
+
+{% if not_found %}
+<div class="alert warn reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div>
+    <strong>Unknown serial — “{{ not_found }}”.</strong>
+    <p>No product identity matches this serial in the demo set. Check the value and try again, or try <span class="mono">TT-DEMO-0001</span>.</p>
+  </div>
+</div>
+{% endif %}
+{% if backend_error %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div>
+    <strong>Verification service unavailable.</strong>
+    <p>The request failed before a verdict could be computed — this is not an all-clear. Correlation ID: <span class="mono">{{ backend_error }}</span>.</p>
+    <div class="action-row"><a class="btn secondary" href="/verify?q={{ q | urlencode }}">Retry request</a></div>
+  </div>
+</div>
+{% endif %}
+
+<section class="panel hero reveal reveal-1" aria-label="Serial lookup">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Serial lookup</span>
+  </div>
+  <h1>Is this unit <em>what it claims</em> to be?</h1>
+  <p class="lede">Paste a raw QR payload or type the printed serial. The desk checks lot commitment, chain integrity, actor authorization, custody order, and movement plausibility — then shows its work. Every figure on this screen is <strong>demo data</strong>.</p>
+  <form action="/verify" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true">
+    <div class="cmd-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="serial" name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Scan or paste serial — e.g. TT-DEMO-0001" aria-label="Serial or QR payload" required minlength="4" />
+      <span class="kbd" aria-hidden="true">⏎</span>
+      <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Verify</button>
+    </div>
+    {% if form_error %}<div class="field" style="margin-top:8px"><div class="error" role="alert">{{ form_error }}</div></div>{% endif %}
+    <div class="try-row">
+      <span class="try-label">Try a fixture</span>
+      <a class="chip" href="/verify?q=TT-DEMO-0001"><span class="mono">TT-DEMO-0001</span> verified</a>
+      <a class="chip" href="/verify?q=TT-DEMO-0002"><span class="mono">TT-DEMO-0002</span> clone conflict</a>
+      <a class="chip" href="/verify?q=TT-DEMO-ERR"><span class="mono">TT-DEMO-ERR</span> error path</a>
+    </div>
+  </form>
+</section>
+
+<section class="panel reveal reveal-2" aria-label="How to read a verdict">
+  <h3>How to read a verdict</h3>
+  <p class="hint">Three rules. No fine print.</p>
+  <div class="principles">
+    <div class="principle">
+      <span class="p-index">/ 01</span>
+      <h4>Verified means consistent</h4>
+      <p>Available history checks passed. It does not independently prove the physical item is genuine.</p>
+    </div>
+    <div class="principle">
+      <span class="p-index">/ 02</span>
+      <h4>Conflicts show evidence</h4>
+      <p>Critical verdicts always name the rules, reference the events, and state the next step.</p>
+    </div>
+    <div class="principle">
+      <span class="p-index">/ 03</span>
+      <h4>Failures are honest</h4>
+      <p>An unavailable service is an error with a retry — never an empty all-clear.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

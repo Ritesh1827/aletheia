@@ -1,0 +1,75 @@
+{% extends "layouts/base.html" %}
+{% import "components/badges.html" as b %}
+{% block title %}Incidents · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">03 · Incident queue</p>
+</header>
+
+{% if load_error %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div>
+    <strong>Incident list unavailable.</strong>
+    <p>Correlation ID: <span class="mono">{{ load_error }}</span>. <a class="btn secondary" href="/incidents">Retry</a></p>
+  </div>
+</div>
+{% else %}
+
+{% if not_found %}
+<div class="alert warn reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div><strong>Unknown case — “{{ not_found }}”.</strong><p>No case matches in the demo set. The list below is complete.</p></div>
+</div>
+{% endif %}
+
+<section class="panel reveal reveal-1" aria-label="Incident queue">
+  <p class="eyebrow">Queue · {{ incidents | length }} shown · demo data</p>
+  <h3>All incidents</h3>
+  <form class="queue-filters" action="/incidents" method="get" aria-label="Filter incidents">
+    <label>Severity
+      <select name="severity" onchange="this.form.submit()">
+        {% for opt in ['all','critical','watch','info'] %}
+        <option value="{{ opt }}" {% if severity == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Status
+      <select name="status" onchange="this.form.submit()">
+        {% for opt in ['all','open','triaged','investigating','resolved'] %}
+        <option value="{{ opt }}" {% if status == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <a class="btn ghost" href="/incidents">Clear</a>
+  </form>
+  {% if incidents %}
+  <div class="table-wrap" role="region" aria-label="Incident table" tabindex="0">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Severity</th><th scope="col">Case</th><th scope="col">Serial</th><th scope="col">Rule</th><th scope="col">Summary</th><th scope="col">Detected</th><th scope="col">Status</th></tr>
+      </thead>
+      <tbody>
+        {% for i in incidents %}
+        <tr>
+          <td>{{ b.severity_badge(i.severity) }}</td>
+          <td><a class="mono" href="/incidents/{{ i.id }}">{{ i.id }}</a></td>
+          <td><a class="mono" href="/verify/{{ i.serial }}">{{ i.serial }}</a></td>
+          <td class="mono">{{ i.rule_id }}</td>
+          <td>{{ i.summary }}</td>
+          <td class="mono">{{ i.detected_at }}</td>
+          <td><span class="stat-pill s-{{ i.status }}">{{ i.status }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert info" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+    <div><strong>No incidents match these filters.</strong><p>“No matches” is not “all clear everywhere” — loosen the filters to see the full demo queue.</p></div>
+  </div>
+  {% endif %}
+</section>
+{% endif %}
+{% endblock %}

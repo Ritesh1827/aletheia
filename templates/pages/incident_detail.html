@@ -1,0 +1,162 @@
+{% extends "layouts/base.html" %}
+{% import "components/badges.html" as b %}
+{% block title %}{{ d.id }} · Incident · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/incidents">03 · Incidents</a><span aria-hidden="true">/</span><span class="mono">{{ d.id }}</span>
+</nav>
+
+{% if flash %}
+<div class="alert info reveal" role="status">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+  <div><strong>Demo action recorded.</strong><p>{{ flash.text }}</p></div>
+</div>
+{% endif %}
+
+{% set tone = 'critical' if d.severity == 'critical' else ('watch' if d.severity == 'watch' else 'neutral') %}
+<section class="decision {{ tone }} reveal reveal-1" aria-label="Incident summary">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ d.id.split('-')[1] }}</div>
+    <div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        {{ b.severity_badge(d.severity) }}
+        <span class="stat-pill s-{{ d.status }}">{{ d.status }}</span>
+        <span class="mono">{{ d.id }} · detected {{ d.detected_at }}</span>
+      </div>
+      <div class="decision-code">Serial {{ d.serial }}</div>
+      <div class="decision-label">Case {{ d.id }} · linked serial verdict below stays authoritative</div>
+      <p class="decision-expl">{{ d.explanation }}</p>
+      <div class="risk-meter" aria-label="Risk score {{ d.risk_score }} of 100">
+        <span>Risk <span class="risk-num">{{ d.risk_score }}/100</span></span>
+        <span class="risk-bar"><i class="risk-fill" style="--w:{{ d.risk_score / 100 }}"></i></span>
+        <span class="risk-conf">{{ d.confidence }}</span>
+      </div>
+      {% if d.uncertainty %}<p class="uncert">Uncertainty: {{ d.uncertainty }}</p>{% endif %}
+      <p class="decision-caveat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <span>{{ caveat }}</span>
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Case · findings</p>
+      <h3>Evidence findings</h3>
+      {% if d.findings %}
+        {% for f in d.findings %}
+        <article class="finding">
+          <div class="finding-head">{{ b.severity_badge(f.severity) }}<span class="rule">{{ f.rule_id }}</span></div>
+          <p><strong>Reason:</strong> {{ f.reason }}</p>
+          {% if f.references %}<p class="refs">refs: {{ f.references | join(', ') }}</p>{% endif %}
+          {% if f.uncertainty %}<p>Uncertainty: {{ f.uncertainty }}</p>{% endif %}
+          {% if f.next_step %}
+          <details><summary>Next step</summary><p>{{ f.next_step }}</p></details>
+          {% endif %}
+        </article>
+        {% endfor %}
+      {% else %}
+        <div class="alert info" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+          <div><strong>No adverse findings on this case.</strong><p>Resolution preserved the original note in the case log.</p></div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if d.conflict %}
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Case · conflict</p>
+      <h3>Conflicting observations</h3>
+      <p class="hint">Side by side — decide which observation the custody chain supports.</p>
+      <div class="vs-grid">
+        <div class="vs-card">
+          <h4>{{ d.conflict.left_label }}</h4>
+          <p>{{ d.conflict.left_detail }}</p>
+        </div>
+        <div class="vs-card suspect">
+          <h4>{{ d.conflict.right_label }}</h4>
+          <p>{{ d.conflict.right_detail }}</p>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if d.timeline %}
+    <div class="panel reveal reveal-3" id="evidence-timeline" x-data="{ filter: 'all' }">
+      <p class="eyebrow">Case · chronology</p>
+      <h3>Evidence timeline</h3>
+      <div class="timeline-filters" role="group" aria-label="Timeline filter">
+        <div class="seg-group">
+          <button class="btn" type="button" :aria-pressed="(filter === 'all').toString()" @click="filter = 'all'">All</button>
+          <button class="btn" type="button" :aria-pressed="(filter === 'custody').toString()" @click="filter = 'custody'">Custody</button>
+          <button class="btn" type="button" :aria-pressed="(filter === 'observation').toString()" @click="filter = 'observation'">Observations</button>
+        </div>
+      </div>
+      <ol class="timeline">
+        {% for e in d.timeline %}
+        <li class="{{ e.kind }}" x-show="filter === 'all' || filter === '{{ e.kind }}'">
+          <span class="t-time">{{ e.timestamp.split(' ')[1][:5] if ' ' in e.timestamp else '' }}</span>
+          <span class="t-kind">{{ e.kind }}</span>
+          <p class="t-sum">{{ e.summary }}</p>
+          <p class="t-meta"><span class="mono">{{ e.event_id }}</span> · {{ e.timestamp }} · {{ e.actor }}{% if e.location %} · {{ e.location }}{% endif %}</p>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+
+    <div class="panel reveal reveal-3">
+      <p class="eyebrow">Case · next</p>
+      <h3>Recommended next steps</h3>
+      <ol class="steps">
+        {% for s in d.next_steps %}
+        <li>{{ s }}</li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    <div class="panel reveal reveal-3">
+      <p class="eyebrow">Case · log</p>
+      <h3>Investigator action audit</h3>
+      <ul class="case-log">
+        {% for a in d.action_log %}
+        <li><span class="mono">{{ a.at }} · {{ a.actor }}</span>{{ a.action }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  <aside class="rail reveal reveal-2" aria-label="Case actions">
+    <div class="panel">
+      <p class="eyebrow">Case · link</p>
+      <h3 class="mono" style="font-size:16px;margin:6px 0 4px">{{ d.serial }}</h3>
+      <p class="hint">Serial verdict is authoritative — this case never overrides it.</p>
+      <div class="action-row">
+        <a class="btn secondary" href="/verify/{{ d.serial }}">Open serial verdict</a>
+        <a class="btn ghost" href="/incidents">← All incidents</a>
+      </div>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Case · act (demo)</p>
+      <h3>Investigation actions</h3>
+      <p class="hint">Demo-safe only. Nothing writes to a backend; every action is labelled.</p>
+      <form action="/incidents/{{ d.id }}/actions" method="post" x-data="{ note: '' }">
+        <input type="hidden" name="csrf" value="demo" />
+        <label class="field" style="display:block;margin-bottom:4px" for="note-{{ d.id }}">Note
+          <textarea class="note-input" id="note-{{ d.id }}" name="note" rows="3" x-model="note" placeholder="Observation, call reference, photo ID…"></textarea>
+        </label>
+        <div class="action-row">
+          <button class="btn secondary" type="submit" formaction="/incidents/{{ d.id }}/actions?action=note" formmethod="post" :disabled="note.trim() === ''" :aria-disabled="(note.trim() === '').toString()">Add note</button>
+          {% if d.status != 'resolved' %}
+          <button class="btn outline" type="submit" formaction="/incidents/{{ d.id }}/actions?action=accept" formmethod="post">Accept and watch</button>
+          {% endif %}
+          <a class="btn ghost" href="/incidents/{{ d.id }}/export" download="case-{{ d.id }}.json">Export case JSON</a>
+        </div>
+      </form>
+    </div>
+  </aside>
+</div>
+{% endblock %}

@@ -1,0 +1,34 @@
+:root {
+  --canvas: #f2efe9;
+  --surface-1: #ffffff;
+  --surface-2: #eae7de;
+  --surface-3: #dfdcd1;
+  --surface-4: #d3cfc2;
+  --line: #d6d2c6;
+  --line-strong: #131311;
+  --text-primary: #131311;
+  --text-secondary: #4a4842;
+  --text-muted: #8b887d;
+  --accent: #da291c;
+  --accent-hover: #b91f14;
+  --accent-pressed: #8f170f;
+  --accent-pale: #a3160d;
+  --accent-ink: #ffffff;
+  --accent-wash: rgba(218, 41, 28, 0.07);
+  --signal-good: #18794e;
+  --signal-watch: #8a6100;
+  --signal-critical: #c81e1e;
+  --signal-info: #1d64b0;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Inter Tight", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-panel: 3px;
+  --radius-control: 2px;
+  --sidebar-w: 248px;
+  --topbar-h: 60px;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --shadow-1: 0 1px 0 rgba(19, 19, 17, 0.08);
+  --shadow-2: 0 16px 30px -20px rgba(19, 19, 17, 0.35);
+  --motion-fast: 150ms var(--ease-out);
+  --motion-med: 250ms var(--ease-out);
+}
