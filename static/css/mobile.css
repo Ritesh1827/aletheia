@@ -112,26 +112,26 @@
 
   /* decision / verdict */
   .decision-body { grid-template-columns: 1fr; gap: 8px; padding: 16px; }
-  .decision-index { font-size: 28px; }
   .decision-code { font-size: 24px; line-height: 28px; }
   .risk-meter { flex-wrap: wrap; gap: 8px; }
   .risk-bar { flex: 1 1 100%; max-width: none; height: 10px; }
   .risk-conf { white-space: normal; }
 
-  /* check matrix -> horizontal snap carousel */
+  /* check matrix -> horizontal snap rail with intact card borders */
   .check-grid {
     display: grid; grid-auto-flow: column;
-    grid-auto-columns: minmax(240px, 80vw);
+    grid-auto-columns: minmax(220px, 78vw);
     grid-template-columns: none;
-    overflow-x: auto; scroll-snap-type: x mandatory;
-    scroll-padding: 0 16px;
+    overflow-x: auto; scroll-snap-type: x proximity;
+    scroll-padding-inline: 16px;
     overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
-    margin: 14px -16px 0; padding: 0 16px 8px;
+    scrollbar-width: thin;
+    margin: 14px -16px 0; padding: 6px 16px 10px;
     gap: 10px;
     max-width: calc(100% + 32px);
   }
-  .check { scroll-snap-align: start; }
+  .check { scroll-snap-align: start; scroll-snap-stop: always; }
   .carousel-hint { display: block; }
 
   /* detail layout */
@@ -324,4 +324,9 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sidebar, .nav-scrim, .to-top { transition: none !important; }
+}
+
+/* touch devices: no hover lift on cards/buttons — prevents stuck states */
+@media (hover: none) {
+  .check:hover, .finding:hover, .btn.primary:hover, .chip:hover { transform: none; }
 }
