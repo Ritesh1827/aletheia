@@ -1,0 +1,82 @@
+{% extends "layouts/base.html" %}
+{% block title %}Red-Team Lab · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">05 · Red-Team Lab</p>
+</header>
+
+{% if forbidden %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="18" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+  <div>
+    <strong>Red-Team Lab is unavailable here.</strong>
+    <p>Scenario execution is demo-gated: it runs only in the mock/demo environment with a demo role. Server-side enforcement is still required — the frontend gate is a UX aid, not a security boundary.</p>
+    <div class="action-row"><a class="btn secondary" href="/overview">Back to Control Tower</a></div>
+  </div>
+</div>
+{% else %}
+
+<section class="panel hero reveal reveal-1" aria-label="Red-Team Lab">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Simulated attacks · demo data only</span>
+  </div>
+  <h1>Break it <em>safely</em> here.</h1>
+  <p class="lede">Six attack scenarios against the demo trust fabric — no production system is touched, no real backend is under attack. Each run evaluates deterministic demo rules against your inputs and shows its work: triggered rules, evidence refs, and links to the affected serial, case, and anchor.</p>
+  <p class="hint" style="margin:0">Demo gate: execution is allowed because this session is a read-only demo with no backend writes. RBAC UI arrives later; the server must still authorize every privileged action independently.</p>
+</section>
+
+{% if form_error %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div><strong>Scenario not started.</strong><p>{{ form_error }}</p></div>
+</div>
+{% endif %}
+
+<section class="panel reveal reveal-2" aria-label="Scenarios">
+  <p class="eyebrow">Scenarios · {{ lab.scenarios | length }} · demo rules</p>
+  <h3>Attack scenarios</h3>
+  <div class="scenario-grid">
+    {% for s in lab.scenarios %}
+    <article class="scenario {% if selected == s.id %}current{% endif %}">
+      <div class="scenario-top">
+        {% if s.severity == 'critical' %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>CRITICAL</span>
+        {% elif s.severity == 'watch' %}<span class="badge watch"><span class="dot" aria-hidden="true"></span>WATCH</span>
+        {% else %}<span class="badge info"><span class="dot" aria-hidden="true"></span>INFO</span>{% endif %}
+        {% if s.has_run %}<span class="stat-pill s-resolved">ran</span>
+        {% else %}<span class="stat-pill">not run</span>{% endif %}
+      </div>
+      <h4>{{ s.name }}</h4>
+      <p>{{ s.objective }}</p>
+      <p class="hint">Detector: <span class="mono">{{ s.detector }}</span></p>
+      <div class="action-row">
+        <a class="btn {% if selected == s.id %}primary{% else %}secondary{% endif %}" href="/red-team/{{ s.id }}{% if ran %}?ran={{ ran }}{% endif %}">Open scenario →</a>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+
+{% if selected %}
+<section class="panel reveal reveal-3" aria-label="Scenario execution">
+  {% set meta = lab.scenarios | selectattr('id', 'equalto', selected) | first %}
+  <p class="eyebrow">Execute · {{ meta.name }}</p>
+  <h3>Run scenario</h3>
+  <form action="/red-team/{{ selected }}/run" method="post" x-data="{ busy: false }" @submit="busy = true">
+    <input type="hidden" name="ran" value="{{ ran }}" />
+    {% for f in fields %}
+    <div class="field" style="margin-bottom:10px">
+      <label for="rt-{{ f.name }}">{{ f.label }}</label>
+      <input id="rt-{{ f.name }}" name="{{ f.name }}" type="text" autocomplete="off" spellcheck="false"
+             value="{{ f.default }}" placeholder="{{ f.placeholder }}" {% if f.required %}required{% endif %} />
+    </div>
+    {% endfor %}
+    <div class="action-row">
+      <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Run scenario</button>
+      <a class="btn ghost" href="/red-team{% if ran %}?ran={{ ran }}{% endif %}">Back to scenarios</a>
+    </div>
+  </form>
+</section>
+{% endif %}
+{% endif %}
+{% endblock %}

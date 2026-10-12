@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Query, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
@@ -110,12 +110,25 @@ def verify_detail(request: Request, serial: str) -> HTMLResponse:
 
 
 @router.get("/verify/{serial}/bundle", include_in_schema=False)
-def verify_bundle(serial: str) -> dict[str, object]:
-    verdict = deps.get_verification(serial)
+def verify_bundle(serial: str) -> Response:
+    try:
+        verdict = deps.get_verification(serial)
+    except UnknownSerialError as exc:
+        return JSONResponse(
+            status_code=404,
+            content={"error": str(exc), "serial": serial.strip(),
+                     "_demo_notice": "DEMO DATA — mock failure, never a successful verification."},
+        )
+    except (MockBackendError, ChainUnavailableError) as exc:
+        return JSONResponse(
+            status_code=502,
+            content={"error": str(exc), "serial": serial.strip(),
+                     "_demo_notice": "DEMO DATA — mock failure, never a successful verification."},
+        )
     payload = verdict.model_dump()
     payload["_demo_notice"] = (
         "DEMO DATA — replaceable mock proof bundle."
         if config.is_demo()
         else "LIVE CHAIN DATA — Besu QBFT anchored proof bundle."
     )
-    return payload
+    return JSONResponse(content=payload)

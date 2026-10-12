@@ -1,0 +1,140 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ meta.name }} · Red-Team Lab · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/red-team">05 · Red-Team Lab</a><span aria-hidden="true">/</span><span class="mono">{{ meta.id }}</span>
+</nav>
+
+<section class="panel hero reveal reveal-1" aria-label="{{ meta.name }}">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Scenario · {{ meta.detector }} · demo data</span>
+  </div>
+  <h1>{{ meta.name }}</h1>
+  <p class="lede">{{ meta.objective }}</p>
+  <form action="/red-team/{{ meta.id }}/run" method="post" x-data="{ busy: false }" @submit="busy = true">
+    <input type="hidden" name="ran" value="{{ ran }}" />
+    {% for f in fields %}
+    <div class="field" style="margin-bottom:10px;max-width:640px">
+      <label for="rt-{{ f.name }}">{{ f.label }}</label>
+      <input id="rt-{{ f.name }}" name="{{ f.name }}" type="text" autocomplete="off" spellcheck="false"
+             value="{{ f.default }}" placeholder="{{ f.placeholder }}" {% if f.required %}required{% endif %} />
+    </div>
+    {% endfor %}
+    {% if form_error %}
+    <div class="alert error" role="alert" style="max-width:640px">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+      <div><strong>Run rejected.</strong><p>{{ form_error }}</p></div>
+    </div>
+    {% endif %}
+    <div class="action-row">
+      <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Run scenario</button>
+      <a class="btn ghost" href="/red-team{% if ran %}?ran={{ ran }}{% endif %}">← All scenarios</a>
+    </div>
+  </form>
+</section>
+
+{% if result %}
+{% set tone = 'critical' if result.outcome in ['detected','rejected'] else ('watch' if result.outcome == 'flagged' else 'neutral') %}
+<section class="decision {{ tone }} reveal reveal-2" aria-label="Scenario result" aria-live="polite">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ result.triggered_rules | length }}</div>
+    <div>
+      {% if result.outcome == 'detected' %}
+      <span class="badge critical"><span class="dot" aria-hidden="true"></span>DETECTED</span>
+      {% elif result.outcome == 'rejected' %}
+      <span class="badge critical"><span class="dot" aria-hidden="true"></span>REJECTED</span>
+      {% elif result.outcome == 'flagged' %}
+      <span class="badge watch"><span class="dot" aria-hidden="true"></span>FLAGGED</span>
+      {% elif result.outcome == 'clean' %}
+      <span class="badge good"><span class="dot" aria-hidden="true"></span>CLEAN</span>
+      {% else %}
+      <span class="badge neutral"><span class="dot" aria-hidden="true"></span>ERROR</span>
+      {% endif %}
+      <div class="decision-code" style="font-size:24px;line-height:28px">{{ result.summary.split(':')[0] }}</div>
+      <p class="decision-expl">{{ result.summary }}</p>
+      {% if result.triggered_rules %}
+      <p class="hint" style="margin:10px 0 0">Rules: {% for r in result.triggered_rules %}<span class="mono">{{ r }}</span>{% if not loop.last %} · {% endif %}{% endfor %}</p>
+      {% endif %}
+      {% if result.evidence_refs %}
+      <p class="hint" style="margin:4px 0 0">Evidence: <span class="mono">{{ result.evidence_refs | join(', ') }}</span></p>
+      {% endif %}
+      {% if result.computed %}
+      <p class="hint" style="margin:4px 0 0">Computed <span class="mono">{{ result.computed[:16] }}…</span> vs expected <span class="mono">{{ result.expected[:16] }}…</span></p>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    {% if result.findings %}
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Result · findings</p>
+      <h3>Evidence findings</h3>
+      {% for f in result.findings %}
+      <article class="finding">
+        <div class="finding-head">
+          {% if f.severity == 'critical' %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>CRITICAL</span>
+          {% elif f.severity == 'watch' %}<span class="badge watch"><span class="dot" aria-hidden="true"></span>WATCH</span>
+          {% else %}<span class="badge info"><span class="dot" aria-hidden="true"></span>INFO</span>{% endif %}
+          <span class="rule">{{ f.rule_id }}</span>
+        </div>
+        <p><strong>Reason:</strong> {{ f.reason }}</p>
+        {% if f.references %}<p class="refs">refs: {{ f.references | join(', ') }}</p>{% endif %}
+        {% if f.next_step %}
+        <details><summary>Next step</summary><p>{{ f.next_step }}</p></details>
+        {% endif %}
+      </article>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Result · event feed</p>
+      <h3>Live event feed</h3>
+      <ol class="mini-feed">
+        {% for e in result.feed %}
+        <li>
+          <span class="mono">{{ e.at }} · {{ e.kind }}</span>
+          <strong>{{ e.text }}</strong>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+
+    {% if result.next_steps %}
+    <div class="panel reveal reveal-3">
+      <p class="eyebrow">Result · next</p>
+      <h3>Recommended next steps</h3>
+      <ol class="steps">
+        {% for s in result.next_steps %}
+        <li>{{ s }}</li>
+        {% endfor %}
+      </ol>
+    </div>
+    {% endif %}
+  </div>
+
+  <aside class="rail reveal reveal-2" aria-label="Result links">
+    <div class="panel">
+      <p class="eyebrow">Result · evidence</p>
+      <h3>Open affected records</h3>
+      <div class="action-row">
+        {% if result.verify_link %}<a class="btn secondary" href="{{ result.verify_link }}">Verify {{ result.serial }}</a>{% endif %}
+        {% if result.incident_link %}<a class="btn outline" href="{{ result.incident_link }}">Open case →</a>{% endif %}
+        {% if result.explorer_link %}<a class="btn outline" href="{{ result.explorer_link }}">Explorer evidence →</a>{% endif %}
+        <a class="btn ghost" href="/red-team/{{ meta.id }}?ran={{ ran }}">Re-run scenario</a>
+      </div>
+    </div>
+  </aside>
+</div>
+{% else %}
+<div class="panel reveal reveal-2" aria-label="No result yet">
+  <p class="eyebrow">Result · not run</p>
+  <h3>No result yet</h3>
+  <p class="hint" style="margin:0">Fill the inputs above and run the scenario. Results render here with rules, evidence, and links — nothing is pre-declared.</p>
+</div>
+{% endif %}
+{% endblock %}

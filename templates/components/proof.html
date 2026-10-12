@@ -1,0 +1,65 @@
+{% macro proof_viewer(proof, tx_hash) -%}
+<div class="proof" x-data="{ revealed: false }">
+  <div class="proof-head">
+    {% if proof.status == 'PROOF VALID' %}
+    <span class="badge good"><span class="dot" aria-hidden="true"></span>PROOF VALID</span>
+    {% elif proof.status == 'PROOF INVALID' %}
+    <span class="badge critical"><span class="dot" aria-hidden="true"></span>PROOF INVALID</span>
+    {% else %}
+    <span class="badge neutral"><span class="dot" aria-hidden="true"></span>NOT VERIFIED</span>
+    {% endif %}
+    <span class="hint" style="margin:0">{{ proof.explanation }}</span>
+  </div>
+  {% if proof.leaf %}
+  <dl class="kv kv-tight" style="margin-top:12px">
+    <dt>Leaf event hash</dt>
+    <dd>
+      <div class="hashrow">
+        <span class="val">{{ proof.leaf[:14] }}…{{ proof.leaf[-8:] }}</span>
+        <button class="btn ghost icon" type="button" @click="copyText('{{ proof.leaf }}', $el)" aria-label="Copy leaf hash">Copy</button>
+      </div>
+    </dd>
+    <dt>Expected root</dt>
+    <dd>
+      <div class="hashrow">
+        <span class="val">{{ proof.expected_root[:14] }}…{{ proof.expected_root[-8:] }}</span>
+        <button class="btn ghost icon" type="button" @click="copyText('{{ proof.expected_root }}', $el)" aria-label="Copy expected root">Copy</button>
+      </div>
+    </dd>
+    {% if proof.computed_root %}
+    <dt>Computed root</dt>
+    <dd>
+      <div class="hashrow">
+        <span class="val">{{ proof.computed_root[:14] }}…{{ proof.computed_root[-8:] }}</span>
+        <button class="btn ghost icon" type="button" @click="copyText('{{ proof.computed_root }}', $el)" aria-label="Copy computed root">Copy</button>
+      </div>
+    </dd>
+    {% endif %}
+  </dl>
+  <ol class="proof-path" aria-label="Merkle proof path">
+    <li class="proof-node leaf">
+      <span class="t-kind">leaf</span>
+      <span class="mono">{{ proof.leaf[:14] }}…{{ proof.leaf[-8:] }}</span>
+    </li>
+    {% for step in proof.steps %}
+    <li class="proof-node">
+      <span class="t-kind">sibling {{ loop.index }} · {{ step.direction }}</span>
+      <span class="mono">{{ step.sibling[:14] }}…{{ step.sibling[-8:] }}</span>
+    </li>
+    {% endfor %}
+    <li class="proof-node root">
+      <span class="t-kind">anchored root</span>
+      <span class="mono">{{ proof.expected_root[:14] }}…{{ proof.expected_root[-8:] }}</span>
+    </li>
+  </ol>
+  <div class="action-row">
+    {% if proof.status == 'NOT VERIFIED' and proof.leaf %}
+    <a class="btn primary" href="/explorer/tx/{{ tx_hash }}?verify=1">Run verification</a>
+    {% endif %}
+    <a class="btn outline" href="/explorer/tx/{{ tx_hash }}/proof{% if proof.status != 'NOT VERIFIED' or proof.leaf %}?verify=1{% endif %}" download="proof-{{ tx_hash[:10] }}.json">Download proof JSON</a>
+  </div>
+  {% else %}
+  <p class="hint" style="margin:12px 0 0">No proof path exists for this transaction. Pending batches have no anchored root to verify against.</p>
+  {% endif %}
+</div>
+{%- endmacro %}

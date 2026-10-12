@@ -1,0 +1,110 @@
+{% extends "layouts/base.html" %}
+{% import "components/proof.html" as p %}
+{% import "components/hash.html" as h %}
+{% block title %}Transaction · Explorer · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/explorer">04 · Explorer</a><span aria-hidden="true">/</span><span>tx</span><span aria-hidden="true">/</span><span class="mono">{{ tx.tx_hash[:14] }}…</span>
+</nav>
+
+{% if flash %}
+<div class="alert {% if flash.kind == 'error' %}error{% elif flash.kind == 'good' %}info{% else %}info{% endif %} reveal" role="status">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+  <div><strong>Proof verification result.</strong><p>{{ flash.text }}</p></div>
+</div>
+{% endif %}
+
+{% set tone = 'good' if tx.status == 'success' else ('watch' if tx.status == 'pending' else 'critical') %}
+<section class="decision {{ tone }} reveal reveal-1" aria-label="Transaction summary">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ tx.leaf_count }}</div>
+    <div>
+      {% if tx.status == 'success' %}
+      <span class="badge good"><span class="dot" aria-hidden="true"></span>SUCCESS</span>
+      {% elif tx.status == 'pending' %}
+      <span class="badge watch"><span class="dot" aria-hidden="true"></span>PENDING</span>
+      {% else %}
+      <span class="badge critical"><span class="dot" aria-hidden="true"></span>FAILED</span>
+      {% endif %}
+      <div class="decision-code">{{ tx.method }}</div>
+      <div class="decision-label">anchor {{ tx.anchor_id }} · lot {{ tx.lot_id }} · demo data</div>
+      {% if tx.payload_missing %}
+      <div class="alert warn" role="note" style="margin-top:12px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div><strong>Partial evidence.</strong><p>On-chain transaction exists but the off-chain batch payload is missing — the Merkle root and leaf count below are unavailable, and the proof cannot be verified yet.</p></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Tx · envelope</p>
+      <h3>Transaction</h3>
+      <dl class="kv">
+        <dt>Hash</dt><dd>{{ h.hashrow(tx.tx_hash, 'transaction hash') }}</dd>
+        <dt>Status</dt><dd>{{ tx.status }}{% if tx.block %} · block <a class="mono" href="/explorer/block/{{ tx.block }}">{{ tx.block }}</a>{% else %} · unconfirmed{% endif %} · {{ tx.time }}</dd>
+        <dt>Sender</dt><dd><a class="mono" href="/explorer/address/{{ tx.sender }}">{{ tx.sender }}</a></dd>
+        <dt>Contract</dt><dd><a class="mono" href="/explorer/address/{{ tx.contract }}">{{ tx.contract }}</a></dd>
+      </dl>
+    </div>
+
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Tx · anchor</p>
+      <h3>Anchor linkage</h3>
+      <dl class="kv">
+        <dt>Anchor</dt><dd class="mono">{{ tx.anchor_id }}</dd>
+        <dt>Lot</dt><dd class="mono">{{ tx.lot_id }}</dd>
+        <dt>Merkle root</dt><dd>{% if tx.root %}{{ h.hashrow(tx.root, 'Merkle root') }}{% else %}— <span class="hint">pending batch has no root yet</span>{% endif %}</dd>
+        <dt>Leaf count</dt><dd>{{ tx.leaf_count }} events</dd>
+        <dt>Off-chain IDs</dt><dd class="mono">{% if tx.offchain_ids %}{{ tx.offchain_ids | join(', ') }}{% else %}—{% endif %}</dd>
+      </dl>
+    </div>
+
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Tx · events</p>
+      <h3>Contract event log</h3>
+      {% if tx.events %}
+      <ul class="lot-list">
+        {% for e in tx.events %}
+        <li><span class="mono">{{ e.name }}</span><span>{{ e.detail }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <div class="alert info" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+        <div><strong>No contract events yet.</strong><p>Pending transactions emit events only once the batch anchors.</p></div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="panel reveal reveal-3">
+      <p class="eyebrow">Tx · inclusion proof</p>
+      <h3>Merkle proof</h3>
+      {{ p.proof_viewer(proof, tx.tx_hash) }}
+    </div>
+  </div>
+
+  <aside class="rail reveal reveal-2" aria-label="Linked records">
+    <div class="panel">
+      <p class="eyebrow">Tx · links</p>
+      <h3>Linked records</h3>
+      <div class="action-row">
+        {% for s in tx.serials %}
+        <a class="btn secondary" href="/verify/{{ s }}">Verify {{ s }}</a>
+        {% endfor %}
+        {% if tx.incident_id %}
+        <a class="btn outline" href="/incidents/{{ tx.incident_id }}">Open {{ tx.incident_id }}</a>
+        {% endif %}
+        {% if tx.block %}
+        <a class="btn ghost" href="/explorer/block/{{ tx.block }}">← Block {{ tx.block }}</a>
+        {% endif %}
+        <a class="btn ghost" href="/explorer">← Explorer</a>
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

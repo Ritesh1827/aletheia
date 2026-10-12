@@ -1,0 +1,67 @@
+{% extends "layouts/base.html" %}
+{% block title %}Block {{ block.height }} · Explorer · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/explorer">04 · Explorer</a><span aria-hidden="true">/</span><span>block</span><span aria-hidden="true">/</span><span class="mono">{{ block.height }}</span>
+</nav>
+
+<section class="decision neutral reveal reveal-1" aria-label="Block summary">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ block.tx_count }}</div>
+    <div>
+      <span class="badge info"><span class="dot" aria-hidden="true"></span>BLOCK · {{ block.tx_count }} TX</span>
+      <div class="decision-code">Block {{ block.height }}</div>
+      <div class="decision-label">{{ block.time }} · demo data</div>
+      <p class="decision-expl">Anchor batch block on the local demo network. Gas fields are omitted — this network does not report them.</p>
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Block · transactions</p>
+      <h3>Transactions</h3>
+      <div class="table-wrap" role="region" aria-label="Block transactions" tabindex="0">
+        <table class="queue">
+          <thead>
+            <tr><th scope="col">Hash</th><th scope="col">Method</th><th scope="col">Sender</th><th scope="col">Status</th><th scope="col">Lot</th></tr>
+          </thead>
+          <tbody>
+            {% for t in block.txs %}
+            <tr>
+              <td><a class="mono" href="/explorer/tx/{{ t.tx_hash }}">{{ t.tx_hash[:14] }}…{{ t.tx_hash[-8:] }}</a></td>
+              <td class="mono">{{ t.method }}</td>
+              <td><a class="mono" href="/explorer/address/{{ t.sender }}">{{ t.sender[:10] }}…</a></td>
+              <td><span class="stat-pill {% if t.status == 'success' %}i-pass{% elif t.status == 'pending' %}s-triaged{% else %}i-fail{% endif %}">{{ t.status }}</span></td>
+              <td class="mono">{{ t.lot_id }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <aside class="rail reveal reveal-2" aria-label="Block identity">
+    <div class="panel">
+      <p class="eyebrow">Block · identity</p>
+      <dl class="kv">
+        <dt>Height</dt><dd class="mono">{{ block.height }}</dd>
+        <dt>Hash</dt><dd class="mono" style="overflow-wrap:anywhere">{{ block.block_hash }}</dd>
+        <dt>Parent</dt><dd class="mono" style="overflow-wrap:anywhere">{{ block.parent_hash }}</dd>
+        <dt>Anchor</dt><dd class="mono">{{ block.anchor_id }}</dd>
+      </dl>
+    </div>
+    <div class="panel">
+      <p class="eyebrow">Block · move</p>
+      <div class="action-row">
+        <a class="btn ghost" href="/explorer">← Explorer</a>
+        {% if block.anchor_id and block.anchor_id.startswith('ANCH') %}
+        <a class="btn secondary" href="/explorer/tx/{{ block.txs[0].tx_hash }}">Open anchor tx</a>
+        {% endif %}
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

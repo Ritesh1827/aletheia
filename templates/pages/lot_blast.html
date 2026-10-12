@@ -1,0 +1,66 @@
+{% extends "layouts/base.html" %}
+{% block title %}{{ blast.lot_id }} blast radius · TrustTrace{% endblock %}
+{% macro blast_tree(nodes) -%}
+<ul class="blast-tree">
+  {% for n in nodes %}
+  <li class="blast-node tone-{{ n.tone }}">
+    <div class="blast-card">
+      <strong>{{ n.label }}</strong>
+      {% if n.detail %}<span>{{ n.detail }}</span>{% endif %}
+      {% if n.link %}<span><a class="btn ghost" href="{{ n.link }}">Open →</a></span>{% endif %}
+    </div>
+    {% if n.children %}{{ blast_tree(n.children) }}{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{%- endmacro %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/lots">06 · Lots</a><span aria-hidden="true">/</span><a href="/lots/{{ lot.lot_id }}" class="mono">{{ lot.lot_id }}</a><span aria-hidden="true">/</span><span>blast-radius</span>
+</nav>
+
+<section class="decision {% if blast.completeness == 'unknown' %}neutral{% elif blast.completeness == 'partial' %}watch{% else %}good{% endif %} reveal reveal-1" aria-label="Blast radius summary">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ blast.affected }}</div>
+    <div>
+      <span class="badge {% if blast.completeness == 'unknown' %}neutral{% elif blast.completeness == 'partial' %}watch{% else %}good{% endif %}"><span class="dot" aria-hidden="true"></span>{{ blast.completeness | upper }} TRACE</span>
+      <div class="decision-code">Blast radius · {{ blast.lot_id }}</div>
+      <div class="decision-label">affected {{ blast.affected }} · sold {{ blast.sold }} · unsold {{ blast.unsold }} · unlocated {{ blast.unlocated }} · demo data</div>
+      <p class="decision-expl">{{ blast.completeness_note }}</p>
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Trace · hierarchy</p>
+      <h3>Lot → units → custodians → cases</h3>
+      {% if blast.tree %}
+      {{ blast_tree(blast.tree) }}
+      {% else %}
+      <div class="alert info" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+        <div><strong>Nothing to trace yet.</strong><p>No product-level demo records exist for this lot — its batch is still pending anchor. This is an honest unknown, not an all-clear.</p></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <aside class="rail reveal reveal-2" aria-label="Blast links">
+    <div class="panel">
+      <p class="eyebrow">Trace · links</p>
+      <h3>Related records</h3>
+      <div class="action-row">
+        <a class="btn secondary" href="/lots/{{ lot.lot_id }}">← Lot {{ lot.lot_id }}</a>
+        {% for i in blast.incident_links %}
+        <a class="btn outline" href="/incidents/{{ i }}">Open {{ i }}</a>
+        {% endfor %}
+        {% for p in lot.products %}
+        <a class="btn ghost" href="/verify/{{ p.serial }}">Verify {{ p.serial }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

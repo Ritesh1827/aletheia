@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+{% block title %}Explorer search · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/explorer">04 · Explorer</a><span aria-hidden="true">/</span><span>search</span>
+</nav>
+
+<section class="panel hero reveal reveal-1" aria-label="Explorer search">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Search · demo index</span>
+  </div>
+  <h1>Search the <em>anchor index</em></h1>
+  <p class="lede">Block height or hash, transaction hash, Merkle root, lot ID, serial, or actor address.</p>
+  <form action="/explorer/search" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true">
+    <div class="cmd-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+             placeholder="e.g. 1845517, LOT-DEMO-A, TT-DEMO-0002" aria-label="Explorer search" value="{{ q | e }}" required minlength="2" />
+      <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Search</button>
+    </div>
+  </form>
+</section>
+
+{% if not_found %}
+<div class="alert warn reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div>
+    <strong>Unknown record — “{{ not_found }}”.</strong>
+    <p>No block, transaction, root, lot, serial, or address matches in the demo index. Unknown input stays unknown — never verified.</p>
+    <div class="action-row"><a class="btn secondary" href="/explorer">Back to explorer</a></div>
+  </div>
+</div>
+{% elif hits %}
+<section class="panel reveal reveal-2" aria-label="Search results">
+  <p class="eyebrow">Results · {{ hits | length }} match{{ 'es' if hits | length != 1 else '' }} for “{{ q }}”</p>
+  <h3>Matches</h3>
+  <ul class="lot-list">
+    {% for hit in hits %}
+    <li>
+      <span class="mono">{{ hit.kind }} · {{ hit.label }}</span>
+      <span>{{ hit.detail }}</span>
+      <span><a class="btn outline" href="{{ hit.link }}">Open {{ hit.kind.lower() }} →</a></span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% if single %}
+  <p class="hint" style="margin:10px 0 0">Single match — open it above, or refine the query for a broader search.</p>
+  {% endif %}
+</section>
+{% elif q %}
+<div class="alert warn reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div>
+    <strong>No matches for “{{ q }}”.</strong>
+    <p>Try <span class="mono">1845517</span>, <span class="mono">LOT-DEMO-A</span>, or <span class="mono">TT-DEMO-0002</span>.</p>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
