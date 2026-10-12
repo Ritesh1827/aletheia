@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+{% block title %}Address · Explorer · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/explorer">04 · Explorer</a><span aria-hidden="true">/</span><span>address</span><span aria-hidden="true">/</span><span class="mono">{{ info.address[:14] }}…</span>
+</nav>
+
+<section class="decision neutral reveal reveal-1" aria-label="Address summary">
+  <div class="decision-band"></div>
+  <div class="decision-body">
+    <div class="decision-index" aria-hidden="true">{{ info.related_txs | length }}</div>
+    <div>
+      <span class="badge info"><span class="dot" aria-hidden="true"></span>{{ info.kind | upper }}</span>
+      <div class="decision-code" style="font-size:22px;line-height:26px;overflow-wrap:anywhere">{{ info.address }}</div>
+      <div class="decision-label">{{ info.label }} · {{ info.status }} · demo data</div>
+    </div>
+  </div>
+</section>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <div class="panel reveal reveal-2">
+      <p class="eyebrow">Address · activity</p>
+      <h3>Related transactions</h3>
+      {% if info.related_txs %}
+      <div class="table-wrap" role="region" aria-label="Related transactions" tabindex="0">
+        <table class="queue">
+          <thead><tr><th scope="col">Hash</th><th scope="col"></th></tr></thead>
+          <tbody>
+            {% for t in info.related_txs %}
+            <tr>
+              <td class="mono">{{ t[:14] }}…{{ t[-8:] }}</td>
+              <td><a class="btn outline" href="/explorer/tx/{{ t }}">Open tx →</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="alert info" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+        <div><strong>No anchored activity.</strong><p>This address has no anchor batches in the demo index.</p></div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <aside class="rail reveal reveal-2" aria-label="Address facts">
+    <div class="panel">
+      <p class="eyebrow">Address · facts</p>
+      <dl class="kv">
+        <dt>Kind</dt><dd>{{ info.kind }}</dd>
+        <dt>Status</dt><dd>{{ info.status }}</dd>
+        {% if info.registered_at %}<dt>Registered</dt><dd class="mono">{{ info.registered_at }}</dd>{% endif %}
+        <dt>Anchors</dt><dd class="mono">{{ info.related_anchors | join(', ') if info.related_anchors else '—' }}</dd>
+      </dl>
+      <div class="action-row"><a class="btn ghost" href="/explorer">← Explorer</a></div>
+    </div>
+  </aside>
+</div>
+{% endblock %}

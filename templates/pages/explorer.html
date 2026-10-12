@@ -1,0 +1,159 @@
+{% extends "layouts/base.html" %}
+{% import "components/hash.html" as h %}
+{% block title %}Provenance Explorer · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">04 · Provenance Explorer</p>
+</header>
+
+{% if load_error %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div>
+    <strong>Explorer backend unavailable.</strong>
+    <p>The chain index could not be read — this is not an all-clear. Correlation ID: <span class="mono">{{ load_error }}</span>.</p>
+    <div class="action-row"><a class="btn secondary" href="/explorer">Retry load</a></div>
+  </div>
+</div>
+{% else %}
+
+<section class="panel hero reveal reveal-1" aria-label="Provenance Explorer">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Supply-chain evidence · demo data</span>
+  </div>
+  <h1>Provenance Explorer</h1>
+  <p class="lede">Inspect anchored supply-chain evidence, not token prices.</p>
+  <form action="/explorer/search" method="get" x-data="{ value: '{{ q | e }}', busy: false }" @submit="busy = true">
+    <div class="cmd-search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="explorer-q" name="q" x-model="value" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Block height, tx hash, root, lot, serial, or address" aria-label="Explorer search" required minlength="2" />
+      <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Search</button>
+    </div>
+  </form>
+  {% if data.query and data.hits %}
+  <div class="try-row">
+    <span class="try-label">{{ data.hits | length }} match{{ 'es' if data.hits | length != 1 else '' }} for “{{ data.query }}”:</span>
+    {% for hit in data.hits %}
+    <a class="chip" href="{{ hit.link }}"><span class="mono">{{ hit.kind }}</span> {{ hit.label }}</a>
+    {% endfor %}
+  </div>
+  {% elif data.query %}
+  <p class="hint" style="margin-top:12px">No records match “{{ data.query }}” in the demo set. Unknown input is reported as unknown — never as verified.</p>
+  {% endif %}
+</section>
+
+{% set net = data.network %}
+{% if net.rpc == 'disconnected' %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div>
+    <strong>Disconnected from the demo chain.</strong>
+    <p>Cached overview below may be out of date. Reconnect the local demo network before trusting block or anchor state.</p>
+  </div>
+</div>
+{% elif net.freshness == 'stale' %}
+<div class="alert warn reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div>
+    <strong>Stale chain snapshot.</strong>
+    <p>Data retrieved {{ net.retrieved_at }}. Latest blocks and anchors may have moved on.</p>
+  </div>
+</div>
+{% endif %}
+
+<section class="panel reveal reveal-2" aria-label="Network status">
+  <p class="eyebrow">Network · {{ net.network_name }}</p>
+  <h3>Chain status</h3>
+  <dl class="kv">
+    <dt>Network</dt><dd>{{ net.network_name }} <span class="hint">— local demo network, not mainnet</span></dd>
+    <dt>Chain ID</dt><dd class="mono">{{ net.chain_id }}</dd>
+    <dt>RPC</dt><dd>{% if net.rpc == 'connected' %}<span class="badge good"><span class="dot" aria-hidden="true"></span>CONNECTED</span>{% else %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>DISCONNECTED</span>{% endif %}</dd>
+    <dt>Latest block</dt><dd class="mono">{{ net.latest_block if net.latest_block is not none else '—' }}</dd>
+    <dt>Latest anchor</dt><dd class="mono">{{ net.latest_anchor or '—' }}</dd>
+    <dt>Pending batches</dt><dd>{{ net.pending_batches }} batch{{ 'es' if net.pending_batches != 1 else '' }} unanchored</dd>
+    <dt>Contract</dt><dd>{% if net.contract %}{{ h.hashrow(net.contract, 'contract address') }}{% else %}—{% endif %}</dd>
+    <dt>Freshness</dt><dd>{{ net.freshness }} · retrieved {{ net.retrieved_at }}</dd>
+  </dl>
+</section>
+
+<section class="panel reveal reveal-2" aria-label="Latest provenance anchors">
+  <p class="eyebrow">Anchors · page {{ data.anchor_page }} of {{ data.anchor_pages }}</p>
+  <h3>Latest provenance anchors</h3>
+  <div class="table-wrap" role="region" aria-label="Anchors table" tabindex="0">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Anchor</th><th scope="col">Block</th><th scope="col">Time</th><th scope="col">Root</th><th scope="col">Events</th><th scope="col">Lot</th><th scope="col">State</th></tr>
+      </thead>
+      <tbody>
+        {% for a in data.anchors %}
+        <tr>
+          <td class="mono">{{ a.anchor_id }}</td>
+          <td>{% if a.block %}<a class="mono" href="/explorer/block/{{ a.block }}">{{ a.block }}</a>{% else %}—{% endif %}</td>
+          <td class="mono">{{ a.time }}</td>
+          <td>{% if a.root %}<span class="mono">{{ a.root[:10] }}…{{ a.root[-6:] }}</span>{% else %}—{% endif %}</td>
+          <td>{{ a.event_count }}</td>
+          <td class="mono">{{ a.lot_id }}</td>
+          <td>{% if a.state == 'anchored' %}<a class="mono" href="/explorer/tx/{{ a.tx_hash }}">tx →</a>{% else %}<span class="stat-pill s-triaged">pending</span>{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="action-row">
+    {% if data.anchor_page > 1 %}
+    <a class="btn outline" href="/explorer?page={{ data.anchor_page - 1 }}{% if mode != 'live' %}&mode={{ mode }}{% endif %}">← Newer</a>
+    {% endif %}
+    {% if data.anchor_page < data.anchor_pages %}
+    <a class="btn outline" href="/explorer?page={{ data.anchor_page + 1 }}{% if mode != 'live' %}&mode={{ mode }}{% endif %}">Older →</a>
+    {% endif %}
+  </div>
+</section>
+
+<div class="tower-grid">
+  <section class="panel reveal reveal-2" aria-label="Recent registry events">
+    <p class="eyebrow">Chain · registry</p>
+    <h3>Recent registry events</h3>
+    <ol class="mini-feed">
+      {% for e in data.events %}
+      <li>
+        <span class="mono">{{ e.time }} · {{ e.kind }}</span>
+        <strong>{{ e.summary }}</strong>
+        <span>{{ e.actor }} · <span class="mono">{{ e.ref }}</span></span>
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="panel reveal reveal-2" aria-label="Lots with recent anchors">
+    <p class="eyebrow">Stock · anchored lots</p>
+    <h3>Lots with recent anchors</h3>
+    <ul class="lot-list">
+      {% for lot in data.lots %}
+      <li>
+        <span class="mono">{{ lot.lot_id }}</span>
+        <span>{{ lot.committed_qty }} units · {{ lot.freeze_state }}</span>
+        <span class="hint">last anchor {{ lot.last_anchor }}{% if lot.root %} · root {{ lot.root[:10] }}…{{ lot.root[-6:] }}{% else %} · root pending{% endif %}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+</div>
+
+<section class="panel reveal reveal-3" aria-label="Anchor health">
+  <p class="eyebrow">Health · anchors</p>
+  <h3>Anchor health</h3>
+  <dl class="kv kv-tight">
+    <dt>Successful anchors</dt><dd>2 batches (ANCH-DEMO-1 · ANCH-DEMO-2)</dd>
+    <dt>Pending batches</dt><dd>1 batch — BATCH-PENDING-3 has 96 unanchored events</dd>
+    <dt>Latest failure</dt><dd>None in demo window</dd>
+  </dl>
+  <p class="hint" style="margin:10px 0 0">Health is computed from the mock index — switch modes with <span class="mono">?mode=stale</span>, <span class="mono">?mode=down</span>, or <span class="mono">?mode=error</span> to preview honest failure states.</p>
+  <div class="action-row">
+    <a class="btn ghost" href="/explorer?mode=stale">Preview stale →</a>
+    <a class="btn ghost" href="/explorer?mode=down">Preview disconnected →</a>
+  </div>
+</section>
+{% endif %}
+{% endblock %}

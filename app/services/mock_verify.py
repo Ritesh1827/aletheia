@@ -10,6 +10,7 @@ from app.models.verify import (
     ProvenanceEvent,
     VerificationVerdict,
 )
+from app.services.mock_explorer import ROOT_A, ROOT_B
 
 
 class UnknownSerialError(Exception):
@@ -85,7 +86,7 @@ def _verified() -> VerificationVerdict:
         ],
         proof=AnchorProof(
             anchor_id="ANCH-DEMO-1",
-            merkle_root="9f2c77d0e4b14aa08c1d9e55f03b72c941ab",
+            merkle_root=ROOT_A,
             transaction_hash="0x7a3f9c1e5b2846d0a9c4e71f3b8d2a6c5e0f1a2b",
             block_height=1841204,
             proof_status="NOT VERIFIED",
@@ -159,7 +160,7 @@ def _clone() -> VerificationVerdict:
         ],
         proof=AnchorProof(
             anchor_id="ANCH-DEMO-2",
-            merkle_root="c41d90aa17be42cc83f0a1d955e08f77b02cd",
+            merkle_root=ROOT_B,
             transaction_hash="0x3d8b21f64a07c9e15d0f42a8c6e9b3d715c8a4",
             block_height=1845517,
             proof_status="NOT VERIFIED",
