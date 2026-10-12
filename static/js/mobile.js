@@ -160,8 +160,10 @@
   }
 
   // ---- Carousel hint: hide once user scrolls the check rail ----
-  function wireCarousels() {
-    $all(".check-grid").forEach(function (grid) {
+  function wireCarousels(root) {
+    $all(".check-grid", root).forEach(function (grid) {
+      if (grid.dataset.carouselWired) return;
+      grid.dataset.carouselWired = "1";
       var hint = grid.parentElement ? grid.parentElement.querySelector(".carousel-hint") : null;
       if (!hint) return;
       grid.addEventListener("scroll", function () {
@@ -175,8 +177,11 @@
     if ($(".verify-dock")) document.body.classList.add("has-dock");
   }
 
-  // ---- htmx partial swaps may inject new tables; re-label them ----
-  document.body.addEventListener("htmx:afterSwap", labelTables);
+  // ---- htmx partial swaps may inject new tables/carousels; re-wire them ----
+  document.body.addEventListener("htmx:afterSwap", function (ev) {
+    labelTables();
+    wireCarousels(ev.target || document);
+  });
 
   function init() {
     observeShell();

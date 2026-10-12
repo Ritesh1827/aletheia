@@ -125,9 +125,11 @@
     grid-template-columns: none;
     overflow-x: auto; scroll-snap-type: x mandatory;
     scroll-padding: 0 16px;
+    overscroll-behavior-x: contain;
     -webkit-overflow-scrolling: touch;
     margin: 14px -16px 0; padding: 0 16px 8px;
     gap: 10px;
+    max-width: calc(100% + 32px);
   }
   .check { scroll-snap-align: start; }
   .carousel-hint { display: block; }
@@ -193,7 +195,7 @@
   .hashrow { flex-wrap: wrap; }
   .hashrow .btn { flex: 1; min-height: 44px; }
 
-  .jsonviewer { font-size: 11.5px; -webkit-overflow-scrolling: touch; }
+  .jsonviewer { font-size: 11.5px; -webkit-overflow-scrolling: touch; max-width: 100%; }
   .proof-path::before { left: 50px; }
   .proof-node { padding-left: 76px; }
   .proof-node::before { left: 44px; }
