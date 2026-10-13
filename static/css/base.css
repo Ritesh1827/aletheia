@@ -243,7 +243,7 @@ a:hover { color: var(--accent); }
   box-shadow: var(--shadow-2);
 }
 
-.menu-toggle { display: none; }
+.topbar .menu-toggle { display: none; }
 
 @media (max-width: 900px) {
   .shell { grid-template-columns: 1fr; }
