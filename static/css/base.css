@@ -253,7 +253,7 @@ a:hover { color: var(--accent); }
     transform: translateX(-100%);
   }
   .shell.nav-open .sidebar { transform: none; }
-  .menu-toggle { display: inline-flex; }
+  .topbar .menu-toggle { display: inline-flex; }
   .topbar { padding: 0 14px; }
   .content { padding: 20px 14px 60px; }
   .session-chip span:last-child { display: none; }
