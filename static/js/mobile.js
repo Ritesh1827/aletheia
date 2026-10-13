@@ -48,6 +48,27 @@
     return s.classList.contains("nav-open");
   }
 
+  // ---- Desktop sidebar collapse (persisted) ----
+  function isCollapsed() {
+    var s = shell();
+    return !!(s && s.classList.contains("nav-collapsed"));
+  }
+  function setCollapsed(collapsed) {
+    var s = shell();
+    if (!s) return;
+    s.classList.toggle("nav-collapsed", !!collapsed);
+    var btn = $('[data-nav-toggle]');
+    if (btn) btn.setAttribute("aria-expanded", collapsed ? "false" : "true");
+    try { localStorage.setItem("al-nav-collapsed", collapsed ? "1" : "0"); } catch (e) { /* private mode */ }
+  }
+  function restoreCollapsed() {
+    var s = shell();
+    if (!s || window.innerWidth <= 900) return;
+    var saved = null;
+    try { saved = localStorage.getItem("al-nav-collapsed"); } catch (e) { /* private mode */ }
+    if (saved === "1") s.classList.add("nav-collapsed");
+  }
+
   document.addEventListener("click", function (ev) {
     var t = ev.target instanceof Element ? ev.target : null;
     if (!t) return;
@@ -55,7 +76,8 @@
     if (toggle) {
       ev.preventDefault();
       lastToggleFocus = toggle;
-      setNav(!isNavOpen());
+      if (window.innerWidth <= 900) setNav(!isNavOpen());
+      else setCollapsed(!isCollapsed());
       return;
     }
     if (t.closest("[data-nav-close]") || t.closest(".nav-scrim")) {
@@ -185,6 +207,7 @@
 
   function init() {
     observeShell();
+    restoreCollapsed();
     labelTables();
     wireCarousels();
     markDock();
