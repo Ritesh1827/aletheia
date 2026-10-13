@@ -29,15 +29,21 @@ def current_role(request: Request) -> str:
 
 def session_context(request: Request) -> dict[str, object]:
     role_id = current_role(request)
-    user = deps.access_overview(role_id).current_user
+    data = deps.access_overview(role_id)
     return {
         "demo": config.is_demo(),
         "chain_label": config.chain_label(),
         "role_id": role_id,
-        "role_name": deps.access_overview(role_id).current_role.name,
-        "user_name": user.name,
-        "user_org": user.organization,
+        "role_name": data.current_role.name,
+        "user_name": data.current_user.name,
+        "user_org": data.current_user.organization,
+        "can": lambda permission: deps.access_can(role_id, permission),
     }
+
+
+def shell(request: Request, active: str) -> dict[str, object]:
+    """Shared template context: demo flags plus current demo session."""
+    return {**session_context(request), "active": active}
 
 
 def guard(

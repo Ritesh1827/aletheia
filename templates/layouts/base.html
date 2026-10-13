@@ -99,11 +99,10 @@
         <button class="btn secondary" type="submit">Go</button>
       </form>
       <div class="topbar-right">
-        <span class="env-pill"><i></i>ENV · {{ chain_label }}</span>
-        <span class="account" title="Demo session — role switching arrives with RBAC (M4)">
-          <span class="avatar" aria-hidden="true">DV</span>
-          <span class="who"><strong>Demo Verifier</strong> · read-only</span>
-        </span>
+        <a class="session-chip" href="/access" title="Demo session — {{ user_name | default('Demo Verifier') }} · switch role in Access Control">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>{{ role_name | default('Read-only Verifier') }} · demo</span>
+        </a>
       </div>
     </header>
 
