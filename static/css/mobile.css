@@ -279,7 +279,7 @@
 
 @media (min-width: 901px) {
   .brand-mini, .tabbar, .verify-dock, .to-top, .nav-scrim,
-  .searchbar--mobile, .drawer-close, .carousel-hint { display: none !important; }
+  .searchbar--mobile, .drawer-close, .carousel-hint, .topbar-actions { display: none !important; }
   .drawer-close { display: none !important; }
 }
 
