@@ -1,7 +1,7 @@
 """Mock access service (M4). Demo session roles, permissions, and audit.
 
 There is no production authentication here. The "session" is a demo role
-selected via query parameter (`?as=`) or cookie (`tt_role`), defaulting to
+selected via query parameter (`?as=`) or cookie (`al_role`), defaulting to
 the read-only verifier. Every privileged decision goes through
 `require()` on the backend — never trust hidden buttons.
 """

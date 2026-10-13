@@ -948,7 +948,7 @@ wheels = [
 ]
 
 [[package]]
-name = "trusttrace-web"
+name = "aletheia-web"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [

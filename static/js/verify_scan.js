@@ -1,5 +1,5 @@
 /* Verify-page scan wiring: modal lifecycle, decode handling, form handoff.
- * Depends on window.TrustTraceScanner (static/js/scanner.js), loaded lazily
+ * Depends on window.AletheiaScanner (static/js/scanner.js), loaded lazily
  * on first Scan click. No-ops gracefully when elements are absent.
  */
 (function () {
@@ -55,8 +55,8 @@
     }
 
     function loadCameras() {
-      if (!window.TrustTraceScanner || !camWrap || !camSelect) return;
-      window.TrustTraceScanner.cameras().then(function (cams) {
+      if (!window.AletheiaScanner || !camWrap || !camSelect) return;
+      window.AletheiaScanner.cameras().then(function (cams) {
         if (!cams || cams.length < 2) {
           camWrap.hidden = true;
           return;
@@ -77,8 +77,8 @@
     }
 
     function startCamera() {
-      if (starting || !window.TrustTraceScanner) {
-        if (!window.TrustTraceScanner) {
+      if (starting || !window.AletheiaScanner) {
+        if (!window.AletheiaScanner) {
           var tag = document.createElement("script");
           tag.src = "/static/js/scanner.js";
           tag.onload = startCamera;
@@ -92,7 +92,7 @@
       starting = true;
       setStatus("Starting camera…");
       var deviceId = camSelect && !camWrap.hidden ? camSelect.value : null;
-      window.TrustTraceScanner.open({
+      window.AletheiaScanner.open({
         deviceId: deviceId,
         onDecode: function (text) {
           decoded = text;
@@ -103,7 +103,7 @@
           if (decodedBox) decodedBox.hidden = false;
           if (useBtn) useBtn.disabled = false;
           setStatus("Code captured. Review it below, then use it or scan again.");
-          window.TrustTraceScanner.close();
+          window.AletheiaScanner.close();
           setRunning(false);
           starting = false;
           if (useBtn) useBtn.focus();
@@ -118,7 +118,7 @@
         if (ok) {
           setRunning(true);
           setStatus("Camera live — hold a QR or barcode inside the frame. Formats: " +
-            window.TrustTraceScanner.formatsLabel + ".");
+            window.AletheiaScanner.formatsLabel + ".");
         }
       });
     }
@@ -126,7 +126,7 @@
     function stopCamera(silent) {
       starting = false;
       setRunning(false);
-      if (window.TrustTraceScanner) window.TrustTraceScanner.close();
+      if (window.AletheiaScanner) window.AletheiaScanner.close();
       if (!silent) setStatus("Camera stopped.");
     }
 

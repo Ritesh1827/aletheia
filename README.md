@@ -1,7 +1,7 @@
-# TrustTrace Web — Milestone 1 (Oxide Observatory · Verify-first)
+# Aletheia Web — Milestone 1 (Oxide Observatory · Verify-first)
 
 Python-first Web layer for the Physical-to-Digital Anti-Counterfeit Trust Fabric.
-Spec source of truth: `TrustTrace_Web_UI_UX_Spec.md` (read-only, do not edit).
+Spec source of truth: `Aletheia_Web_UI_UX_Spec.md` (read-only, do not edit).
 
 ## Run (M1)
 
@@ -12,10 +12,10 @@ uv run uvicorn app.main:app --reload
 
 Open `http://127.0.0.1:8000/verify` and try:
 
-- `TT-DEMO-0001` — VERIFIED path
-- `TT-DEMO-0002` — CLONE_DETECTED with conflicting observations
-- `TT-DEMO-UNKNOWN` — unknown-serial state
-- `TT-DEMO-ERR` — backend error state (retry; never an all-clear)
+- `AL-DEMO-0001` — VERIFIED path
+- `AL-DEMO-0002` — CLONE_DETECTED with conflicting observations
+- `AL-DEMO-UNKNOWN` — unknown-serial state
+- `AL-DEMO-ERR` — backend error state (retry; never an all-clear)
 
 ## Checks
 

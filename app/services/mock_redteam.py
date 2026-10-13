@@ -84,16 +84,16 @@ def _metas(run_state: dict[str, bool] | None = None) -> list[ScenarioMeta]:
 def _fields() -> dict[str, list[ScenarioField]]:
     return {
         "clone-qr": [
-            ScenarioField(name="serial", label="Serial", default="TT-DEMO-0002"),
+            ScenarioField(name="serial", label="Serial", default="AL-DEMO-0002"),
             ScenarioField(name="gap_minutes", label="Minutes between scans", default="41"),
         ],
         "revoked-actor": [
             ScenarioField(name="actor", label="Submitting actor address",
                           default=mock_explorer.ACTOR_UNKNOWN),
-            ScenarioField(name="serial", label="Serial", default="TT-DEMO-0002"),
+            ScenarioField(name="serial", label="Serial", default="AL-DEMO-0002"),
         ],
         "fake-handover": [
-            ScenarioField(name="serial", label="Serial", default="TT-DEMO-0001"),
+            ScenarioField(name="serial", label="Serial", default="AL-DEMO-0001"),
             ScenarioField(name="receiver_accepted", label="Receiver accepted? (yes/no)",
                           default="no"),
         ],
@@ -102,12 +102,12 @@ def _fields() -> dict[str, list[ScenarioField]]:
                           default=mock_explorer.TX_B),
         ],
         "double-claim": [
-            ScenarioField(name="serial", label="Serial", default="TT-DEMO-0002"),
+            ScenarioField(name="serial", label="Serial", default="AL-DEMO-0002"),
             ScenarioField(name="claimants", label="Competing claimants (comma-separated)",
                           default="Harbor Retail DC, Unknown claimant"),
         ],
         "post-sale-scan": [
-            ScenarioField(name="serial", label="Serial", default="TT-DEMO-0001"),
+            ScenarioField(name="serial", label="Serial", default="AL-DEMO-0001"),
             ScenarioField(name="sale_event", label="Recorded sale event ID", default="evt-0006"),
             ScenarioField(name="scan_event", label="New scan event ID", default="evt-0007"),
         ],

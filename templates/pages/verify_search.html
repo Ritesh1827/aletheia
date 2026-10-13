@@ -1,5 +1,5 @@
 {% extends "layouts/base.html" %}
-{% block title %}Verify Product · TrustTrace{% endblock %}
+{% block title %}Verify Product · Aletheia{% endblock %}
 {% block scripts %}
   <script src="/static/js/verify_scan.js" defer></script>
 {% endblock %}
@@ -13,7 +13,7 @@
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
   <div>
     <strong>Unknown serial — “{{ not_found }}”.</strong>
-    <p>No product identity matches this serial in the demo set. Check the value and try again, or try <span class="mono">TT-DEMO-0001</span>.</p>
+    <p>No product identity matches this serial in the demo set. Check the value and try again, or try <span class="mono">AL-DEMO-0001</span>.</p>
     {% if scan_note %}<p>{{ scan_note }}</p>{% endif %}
   </div>
 </div>
@@ -41,7 +41,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="serial" name="q" x-model="value" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
              inputmode="text" enterkeyhint="search"
-             placeholder="Scan or paste serial — e.g. TT-DEMO-0001" aria-label="Serial or QR payload" required minlength="4" />
+             placeholder="Scan or paste serial — e.g. AL-DEMO-0001" aria-label="Serial or QR payload" required minlength="4" />
       <span class="kbd" aria-hidden="true">⏎</span>
       <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Verify</button>
       <button class="btn outline" type="button" id="scan-open" aria-haspopup="dialog">Scan code</button>
@@ -49,9 +49,9 @@
     {% if form_error %}<div class="field" style="margin-top:8px"><div class="error" role="alert">{{ form_error }}</div></div>{% endif %}
     <div class="try-row">
       <span class="try-label">Try a fixture</span>
-      <a class="chip" href="/verify?q=TT-DEMO-0001"><span class="mono">TT-DEMO-0001</span> verified</a>
-      <a class="chip" href="/verify?q=TT-DEMO-0002"><span class="mono">TT-DEMO-0002</span> clone conflict</a>
-      <a class="chip" href="/verify?q=TT-DEMO-ERR"><span class="mono">TT-DEMO-ERR</span> error path</a>
+      <a class="chip" href="/verify?q=AL-DEMO-0001"><span class="mono">AL-DEMO-0001</span> verified</a>
+      <a class="chip" href="/verify?q=AL-DEMO-0002"><span class="mono">AL-DEMO-0002</span> clone conflict</a>
+      <a class="chip" href="/verify?q=AL-DEMO-ERR"><span class="mono">AL-DEMO-ERR</span> error path</a>
     </div>
   </form>
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#131311" />
-  <title>{% block title %}TrustTrace · Verification Desk{% endblock %}</title>
+  <title>{% block title %}Aletheia · Verification Desk{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Inter+Tight:wght@700;750;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
@@ -24,9 +24,9 @@
   <div class="nav-scrim" data-nav-close aria-hidden="true"></div>
   <aside class="sidebar" aria-label="Primary">
     <div class="brand">
-      <span class="brand-mark" aria-hidden="true">T</span>
+      <span class="brand-mark" aria-hidden="true">A</span>
       <span class="brand-stack">
-        <span class="brand-name">TrustTrace</span>
+        <span class="brand-name">Aletheia</span>
         <span class="brand-sub">Verification Desk</span>
       </span>
       <button class="btn ghost icon drawer-close" type="button" data-nav-close aria-label="Close navigation">
@@ -81,12 +81,12 @@
       <button class="btn ghost menu-toggle" type="button" data-nav-toggle aria-label="Toggle navigation" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
-      <a class="brand-mini" href="/verify" aria-label="TrustTrace home">
-        <span class="brand-mark" aria-hidden="true">T</span><span>TrustTrace</span>
+      <a class="brand-mini" href="/verify" aria-label="Aletheia home">
+        <span class="brand-mark" aria-hidden="true">A</span><span>Aletheia</span>
       </a>
-      <span class="topbar-index">TT</span>
+      <span class="topbar-index">AL</span>
       <form class="searchbar searchbar--desktop" action="/verify" method="get" role="search">
-        <input name="q" type="search" placeholder="Search serial — try TT-DEMO-0001" aria-label="Global serial search" value="{{ q if q is defined else '' }}" />
+        <input name="q" type="search" placeholder="Search serial — try AL-DEMO-0001" aria-label="Global serial search" value="{{ q if q is defined else '' }}" />
         <button class="btn secondary" type="submit">Search</button>
       </form>
       <div class="topbar-actions">
@@ -95,7 +95,7 @@
         </button>
       </div>
       <form class="searchbar searchbar--mobile" action="/verify" method="get" role="search">
-        <input name="q" type="search" placeholder="Serial — e.g. TT-DEMO-0001" aria-label="Global serial search" value="{{ q if q is defined else '' }}" />
+        <input name="q" type="search" placeholder="Serial — e.g. AL-DEMO-0001" aria-label="Global serial search" value="{{ q if q is defined else '' }}" />
         <button class="btn secondary" type="submit">Go</button>
       </form>
       <div class="topbar-right">

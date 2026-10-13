@@ -6,7 +6,7 @@ import os
 
 
 def api_mode() -> str:
-    return os.getenv("TRUSTTRACE_API_MODE", "mock").lower()
+    return os.getenv("ALETHEIA_API_MODE", "mock").lower()
 
 
 def is_demo() -> bool:
@@ -14,8 +14,8 @@ def is_demo() -> bool:
 
 
 def chain_label() -> str:
-    return os.getenv("TRUSTTRACE_CHAIN_LABEL", "local demo network")
+    return os.getenv("ALETHEIA_CHAIN_LABEL", "local demo network")
 
 
 def app_title() -> str:
-    return "TrustTrace · Oxide Observatory"
+    return "Aletheia · Oxide Observatory"

@@ -114,7 +114,7 @@ def test_tamper_unknown_seq_is_rejected() -> None:
 
 def test_redteam_run_and_role_switch_audited(client: TestClient) -> None:
     client.post("/red-team/clone-qr/run", params={"as": "operator"},
-                data={"serial": "TT-DEMO-0002", "gap_minutes": "41"})
+                data={"serial": "AL-DEMO-0002", "gap_minutes": "41"})
     client.post("/access/role", data={"role_id": "admin", "next": "/access"})
     actions = {(e.action, e.outcome) for e in mock_audit._LOG}
     assert ("redteam:run", "allowed") in actions

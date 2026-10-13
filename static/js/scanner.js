@@ -1,4 +1,4 @@
-/* TrustTrace code scanner — dedicated reusable module.
+/* Aletheia code scanner — dedicated reusable module.
  *
  * Uses html5-qrcode (bundled locally at /static/js/vendor/) for in-browser
  * decoding of QR codes, EAN-13, EAN-8, UPC-A, UPC-E and Code 128. Camera
@@ -96,7 +96,7 @@
       + "Serve over localhost or HTTPS, or type the serial manually.";
   }
 
-  window.TrustTraceScanner = {
+  window.AletheiaScanner = {
     formatsLabel: "QR · EAN-13 · EAN-8 · UPC-A · UPC-E · Code 128",
     isOpen: function () { return sessionOpen; },
 

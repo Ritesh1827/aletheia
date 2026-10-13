@@ -32,11 +32,11 @@ class MockOperationsError(Exception):
 
 
 def _clone_findings() -> list[EvidenceFinding]:
-    return mock_verify.verify_serial("TT-DEMO-0002").findings
+    return mock_verify.verify_serial("AL-DEMO-0002").findings
 
 
 def _clone_timeline() -> list[ProvenanceEvent]:
-    return mock_verify.verify_serial("TT-DEMO-0002").timeline
+    return mock_verify.verify_serial("AL-DEMO-0002").timeline
 
 
 def incident_summaries() -> list[IncidentSummary]:
@@ -45,7 +45,7 @@ def incident_summaries() -> list[IncidentSummary]:
             id="INC-1042",
             severity="critical",
             status="open",
-            serial="TT-DEMO-0002",
+            serial="AL-DEMO-0002",
             rule_id="R-VELOCITY-04",
             summary="Impossible movement — Oslo and Gdansk scans 41 minutes apart.",
             detected_at="2026-10-01 10:05 UTC",
@@ -54,7 +54,7 @@ def incident_summaries() -> list[IncidentSummary]:
             id="INC-1041",
             severity="critical",
             status="investigating",
-            serial="TT-DEMO-0002",
+            serial="AL-DEMO-0002",
             rule_id="R-DUP-IDENTITY-02",
             summary="Duplicate custody claims for one serial after evt-0011.",
             detected_at="2026-10-01 10:31 UTC",
@@ -63,7 +63,7 @@ def incident_summaries() -> list[IncidentSummary]:
             id="INC-1038",
             severity="watch",
             status="triaged",
-            serial="TT-DEMO-0007",
+            serial="AL-DEMO-0007",
             rule_id="R-ACTOR-01",
             summary="Observation from unregistered scanner held for review.",
             detected_at="2026-09-29 15:44 UTC",
@@ -72,7 +72,7 @@ def incident_summaries() -> list[IncidentSummary]:
             id="INC-1031",
             severity="info",
             status="resolved",
-            serial="TT-DEMO-0001",
+            serial="AL-DEMO-0001",
             rule_id="R-POST-SALE-01",
             summary="No post-sale scan yet; routine watch closed with note kept.",
             detected_at="2026-09-20 09:02 UTC",
@@ -96,10 +96,10 @@ def get_overview(
     return OverviewData(
         metrics=[
             TowerMetric(id="critical", label="Open critical incidents", value=str(len(open_critical)),
-                        context="2 linked to TT-DEMO-0002", tone="critical",
+                        context="2 linked to AL-DEMO-0002", tone="critical",
                         link="/incidents?severity=critical&status=open"),
             TowerMetric(id="contested", label="Contested serials", value="1",
-                        context="TT-DEMO-0002 under review", tone="watch",
+                        context="AL-DEMO-0002 under review", tone="watch",
                         link="/incidents?status=investigating"),
             TowerMetric(id="frozen", label="Frozen lots", value="0",
                         context="No lot frozen in demo set", tone="good",
@@ -114,16 +114,16 @@ def get_overview(
         incidents=incidents,
         custody_events=[
             CustodyEvent(event_id="evt-0014", timestamp="2026-10-01 10:20 UTC",
-                         actor="Unknown claimant", serial="TT-DEMO-0002",
+                         actor="Unknown claimant", serial="AL-DEMO-0002",
                          summary="Second custody claim submitted."),
             CustodyEvent(event_id="evt-0011", timestamp="2026-09-28 13:05 UTC",
-                         actor="Harbor Retail DC → Store 14", serial="TT-DEMO-0002",
+                         actor="Harbor Retail DC → Store 14", serial="AL-DEMO-0002",
                          summary="Dispatched to retail store."),
             CustodyEvent(event_id="evt-0006", timestamp="2026-09-02 11:58 UTC",
-                         actor="Northwind → Harbor Retail DC", serial="TT-DEMO-0001",
+                         actor="Northwind → Harbor Retail DC", serial="AL-DEMO-0001",
                          summary="Outbound transfer accepted."),
             CustodyEvent(event_id="evt-0005", timestamp="2026-08-26 17:25 UTC",
-                         actor="Northwind Logistics", serial="TT-DEMO-0001",
+                         actor="Northwind Logistics", serial="AL-DEMO-0001",
                          summary="Received at regional depot."),
         ],
         anchor_health=AnchorHealth(
@@ -161,9 +161,9 @@ def get_incident(incident_id: str) -> IncidentDetail:
             id="INC-1042",
             severity="critical",
             status="open",
-            serial="TT-DEMO-0002",
+            serial="AL-DEMO-0002",
             detected_at="2026-10-01 10:05 UTC",
-            explanation="Two scans claim serial TT-DEMO-0002 in Oslo and Gdansk, 41 minutes apart. "
+            explanation="Two scans claim serial AL-DEMO-0002 in Oslo and Gdansk, 41 minutes apart. "
             "One unit cannot plausibly cover 1,140 km in that window, so at least one scan — "
             "likely the Gdansk one from an unregistered scanner — is suspect.",
             findings=_clone_findings(),
@@ -201,7 +201,7 @@ def get_incident(incident_id: str) -> IncidentDetail:
         detail.status = "investigating"
         detail.explanation = (
             "Companion case to INC-1042: after the conflicting scans, a second custody claim "
-            "(evt-0014) was submitted for TT-DEMO-0002 by an unknown claimant. Outbound transfer "
+            "(evt-0014) was submitted for AL-DEMO-0002 by an unknown claimant. Outbound transfer "
             "is held until one claim is withdrawn or proven."
         )
         detail.detected_at = "2026-10-01 10:31 UTC"
@@ -211,9 +211,9 @@ def get_incident(incident_id: str) -> IncidentDetail:
             id="INC-1038",
             severity="watch",
             status="triaged",
-            serial="TT-DEMO-0007",
+            serial="AL-DEMO-0007",
             detected_at="2026-09-29 15:44 UTC",
-            explanation="A single observation for TT-DEMO-0007 arrived from a scanner that is not "
+            explanation="A single observation for AL-DEMO-0007 arrived from a scanner that is not "
             "in the actor registry. No conflicting custody exists yet, so this stays a watch — "
             "held for registrar review rather than quarantine.",
             findings=[
@@ -230,7 +230,7 @@ def get_incident(incident_id: str) -> IncidentDetail:
             timeline=[],
             risk_score=34,
             confidence="Medium — single uncorroborated signal.",
-            uncertainty="No custody context yet for TT-DEMO-0007 in this demo set.",
+            uncertainty="No custody context yet for AL-DEMO-0007 in this demo set.",
             next_steps=["Registrar reviews the device enrollment request."],
             actions=[
                 InvestigationAction(id="note", label="Add note", kind="note"),
@@ -245,9 +245,9 @@ def get_incident(incident_id: str) -> IncidentDetail:
             id="INC-1031",
             severity="info",
             status="resolved",
-            serial="TT-DEMO-0001",
+            serial="AL-DEMO-0001",
             detected_at="2026-09-20 09:02 UTC",
-            explanation="Routine watch: TT-DEMO-0001 had no post-sale scan while still in distribution "
+            explanation="Routine watch: AL-DEMO-0001 had no post-sale scan while still in distribution "
             "custody. Expected behavior — closed with the note preserved below.",
             findings=[],
             conflict=None,

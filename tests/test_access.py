@@ -41,7 +41,7 @@ def test_role_switch_sets_cookie_and_redirects(client: TestClient) -> None:
     res = client.post("/access/role", data={"role_id": "investigator", "next": "/access"},
                       follow_redirects=False)
     assert res.status_code == 303
-    assert "tt_role=investigator" in res.headers.get("set-cookie", "")
+    assert "al_role=investigator" in res.headers.get("set-cookie", "")
     follow = client.get("/access")
     assert "Acting as Investigator" in follow.text
 
@@ -74,7 +74,7 @@ def test_verifier_denied_recall_annotate_and_redteam(client: TestClient) -> None
     assert client.post("/incidents/INC-1042/actions",
                        params={"action": "note"}).status_code == 403
     assert client.post("/red-team/clone-qr/run",
-                       data={"serial": "TT-DEMO-0002",
+                       data={"serial": "AL-DEMO-0002",
                              "gap_minutes": "41"}).status_code == 403
     res = client.get("/red-team/clone-qr/result")
     assert res.status_code == 403
@@ -105,7 +105,7 @@ def test_admin_can_recall(client: TestClient) -> None:
 
 def test_operator_least_privilege_for_redteam(client: TestClient) -> None:
     run = client.post("/red-team/clone-qr/run", params={"as": "operator"},
-                      data={"serial": "TT-DEMO-0002", "gap_minutes": "41"},
+                      data={"serial": "AL-DEMO-0002", "gap_minutes": "41"},
                       follow_redirects=False)
     assert run.status_code == 303
     frozen = client.post("/lots/LOT-DEMO-A/freeze", params={"as": "operator"},

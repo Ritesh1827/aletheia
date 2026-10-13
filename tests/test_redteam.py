@@ -41,18 +41,18 @@ def test_lab_unknown_scenario_is_404(client: TestClient) -> None:
 
 def test_clone_qr_detected(client: TestClient) -> None:
     res = client.post("/red-team/clone-qr/run", params={"as": "operator"},
-                      data={"serial": "TT-DEMO-0002", "gap_minutes": "41"},
+                      data={"serial": "AL-DEMO-0002", "gap_minutes": "41"},
                       follow_redirects=True)
     assert res.status_code == 200
     assert "DETECTED" in res.text
     assert "R-VELOCITY-04" in res.text
     assert "evt-0012" in res.text
-    assert "/verify/TT-DEMO-0002" in res.text
+    assert "/verify/AL-DEMO-0002" in res.text
     assert "/incidents/INC-1042" in res.text
 
 
 def test_clone_qr_clean_on_plausible_gap() -> None:
-    result = deps.run_redteam_scenario("clone-qr", {"serial": "TT-DEMO-0002",
+    result = deps.run_redteam_scenario("clone-qr", {"serial": "AL-DEMO-0002",
                                                     "gap_minutes": "600"})
     assert result.outcome == "clean"
     assert result.triggered_rules == []
@@ -60,7 +60,7 @@ def test_clone_qr_clean_on_plausible_gap() -> None:
 
 def test_revoked_actor_rejected() -> None:
     result = deps.run_redteam_scenario("revoked-actor",
-                                       {"actor": ACTOR_UNKNOWN, "serial": "TT-DEMO-0002"})
+                                       {"actor": ACTOR_UNKNOWN, "serial": "AL-DEMO-0002"})
     assert result.outcome == "rejected"
     assert result.triggered_rules == ["R-ACTOR-01"]
     assert "REJECTED" in result.summary
@@ -70,20 +70,20 @@ def test_revoked_actor_clean_for_registered() -> None:
     from app.services.mock_explorer import ACTOR_NORTHWIND
 
     result = deps.run_redteam_scenario("revoked-actor",
-                                       {"actor": ACTOR_NORTHWIND, "serial": "TT-DEMO-0001"})
+                                       {"actor": ACTOR_NORTHWIND, "serial": "AL-DEMO-0001"})
     assert result.outcome == "clean"
 
 
 def test_fake_handover_rejected_without_acceptance() -> None:
     result = deps.run_redteam_scenario("fake-handover",
-                                       {"serial": "TT-DEMO-0001", "receiver_accepted": "no"})
+                                       {"serial": "AL-DEMO-0001", "receiver_accepted": "no"})
     assert result.outcome == "rejected"
     assert result.triggered_rules == ["R-CUSTODY-03"]
 
 
 def test_fake_handover_clean_with_acceptance() -> None:
     result = deps.run_redteam_scenario("fake-handover",
-                                       {"serial": "TT-DEMO-0001", "receiver_accepted": "yes"})
+                                       {"serial": "AL-DEMO-0001", "receiver_accepted": "yes"})
     assert result.outcome == "clean"
 
 
@@ -98,7 +98,7 @@ def test_tampered_history_detected_with_values() -> None:
 def test_double_claim_detected() -> None:
     result = deps.run_redteam_scenario(
         "double-claim",
-        {"serial": "TT-DEMO-0002", "claimants": "Harbor Retail DC, Unknown claimant"})
+        {"serial": "AL-DEMO-0002", "claimants": "Harbor Retail DC, Unknown claimant"})
     assert result.outcome == "detected"
     assert result.triggered_rules == ["R-DUP-IDENTITY-02"]
     assert result.incident_link == "/incidents/INC-1041"
@@ -107,7 +107,7 @@ def test_double_claim_detected() -> None:
 def test_post_sale_scan_flagged() -> None:
     result = deps.run_redteam_scenario(
         "post-sale-scan",
-        {"serial": "TT-DEMO-0001", "sale_event": "evt-0006", "scan_event": "evt-0007"})
+        {"serial": "AL-DEMO-0001", "sale_event": "evt-0006", "scan_event": "evt-0007"})
     assert result.outcome == "flagged"
     assert result.triggered_rules == ["R-LIFECYCLE-05"]
     assert "evt-0006" in result.evidence_refs and "evt-0007" in result.evidence_refs
@@ -122,9 +122,9 @@ def test_malformed_inputs_rejected() -> None:
     with pytest.raises(InvalidScenarioInputError):
         deps.run_redteam_scenario("clone-qr", {"serial": "", "gap_minutes": "41"})
     with pytest.raises(InvalidScenarioInputError):
-        deps.run_redteam_scenario("clone-qr", {"serial": "TT-DEMO-0002", "gap_minutes": "abc"})
+        deps.run_redteam_scenario("clone-qr", {"serial": "AL-DEMO-0002", "gap_minutes": "abc"})
     with pytest.raises(InvalidScenarioInputError):
-        deps.run_redteam_scenario("double-claim", {"serial": "TT-DEMO-0002",
+        deps.run_redteam_scenario("double-claim", {"serial": "AL-DEMO-0002",
                                                    "claimants": "only-one"})
     with pytest.raises(InvalidScenarioInputError):
         deps.run_redteam_scenario("tampered-history", {"tx": "0xdead"})
@@ -132,7 +132,7 @@ def test_malformed_inputs_rejected() -> None:
 
 def test_run_post_invalid_input_is_422(client: TestClient) -> None:
     res = client.post("/red-team/clone-qr/run", params={"as": "operator"},
-                      data={"serial": "TT-DEMO-0002", "gap_minutes": "abc"})
+                      data={"serial": "AL-DEMO-0002", "gap_minutes": "abc"})
     assert res.status_code == 422
     assert "must be a number" in res.text
 
@@ -150,7 +150,7 @@ def test_result_json_endpoint(client: TestClient) -> None:
 
 
 def test_existing_pages_still_work(client: TestClient) -> None:
-    paths = ["/verify", "/verify/TT-DEMO-0001", "/incidents",
+    paths = ["/verify", "/verify/AL-DEMO-0001", "/incidents",
              "/incidents/INC-1042", "/overview", "/explorer"]
     for path in paths:
         res = client.get(path)

@@ -1,6 +1,6 @@
 """Demo session helper: role resolution + backend permission guard.
 
-The session is a demo role carried on `?as=` or the `tt_role` cookie,
+The session is a demo role carried on `?as=` or the `al_role` cookie,
 defaulting to the read-only verifier. `guard()` enforces permissions on the
 backend and renders a 403 page on denial — UI hiding is never the boundary.
 """
@@ -17,7 +17,7 @@ from app.services.mock_access import ForbiddenError
 
 templates = Jinja2Templates(directory="templates")
 
-SESSION_COOKIE = "tt_role"
+SESSION_COOKIE = "al_role"
 
 
 def current_role(request: Request) -> str:

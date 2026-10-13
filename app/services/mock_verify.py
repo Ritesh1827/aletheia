@@ -27,7 +27,7 @@ class MockBackendError(Exception):
 
 def _verified() -> VerificationVerdict:
     return VerificationVerdict(
-        serial="TT-DEMO-0001",
+        serial="AL-DEMO-0001",
         verdict="VERIFIED",
         explanation="All available history checks are consistent for this serial. "
         "Lot commitment matches, custody sequence is ordered, and the anchor proof is present.",
@@ -36,7 +36,7 @@ def _verified() -> VerificationVerdict:
         uncertainty="No post-sale observation exists yet for this unit.",
         retrieved_at="2026-10-12T09:14:00Z",
         identity=ProductIdentity(
-            serial="TT-DEMO-0001",
+            serial="AL-DEMO-0001",
             lot_id="LOT-DEMO-A",
             product="Oxide Sensor Housing · Rev C",
             lifecycle_status="In distribution",
@@ -97,7 +97,7 @@ def _verified() -> VerificationVerdict:
 
 def _clone() -> VerificationVerdict:
     return VerificationVerdict(
-        serial="TT-DEMO-0002",
+        serial="AL-DEMO-0002",
         verdict="CLONE_DETECTED",
         explanation="Two histories claim this serial in different places at overlapping times. "
         "Treat the physical item as suspect until an investigator resolves the conflict.",
@@ -106,7 +106,7 @@ def _clone() -> VerificationVerdict:
         uncertainty="One of the two observation sets may come from a cloned QR.",
         retrieved_at="2026-10-12T09:16:00Z",
         identity=ProductIdentity(
-            serial="TT-DEMO-0002",
+            serial="AL-DEMO-0002",
             lot_id="LOT-DEMO-A",
             product="Oxide Sensor Housing · Rev C",
             lifecycle_status="Contested",
@@ -172,10 +172,10 @@ def _clone() -> VerificationVerdict:
 def verify_serial(serial: str) -> VerificationVerdict:
     """Return the mock verdict for a serial. Raises typed errors, never None."""
     key = serial.strip().upper()
-    if key == "TT-DEMO-ERR":
+    if key == "AL-DEMO-ERR":
         raise MockBackendError(correlation_id="demo-corr-7f3a")
-    if key == "TT-DEMO-0001":
+    if key == "AL-DEMO-0001":
         return _verified()
-    if key == "TT-DEMO-0002":
+    if key == "AL-DEMO-0002":
         return _clone()
     raise UnknownSerialError(serial=serial.strip())

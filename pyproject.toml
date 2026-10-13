@@ -1,7 +1,7 @@
 [project]
-name = "trusttrace-web"
+name = "aletheia-web"
 version = "0.1.0"
-description = "TrustTrace Web layer — Oxide Observatory forensic UI (FastAPI + Jinja2 + HTMX)"
+description = "Aletheia Web layer — Oxide Observatory forensic UI (FastAPI + Jinja2 + HTMX)"
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115",

@@ -1,4 +1,4 @@
-/* TrustTrace mobile interactions: drawer, tabbar, tables->cards, share, sticky states. */
+/* Aletheia mobile interactions: drawer, tabbar, tables->cards, share, sticky states. */
 (function () {
   "use strict";
 
@@ -195,5 +195,5 @@
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
   else init();
 
-  window.TrustTraceMobile = { setNav: setNav, labelTables: labelTables };
+  window.AletheiaMobile = { setNav: setNav, labelTables: labelTables };
 })();

@@ -104,9 +104,9 @@ def get_lot(lot_id: str) -> LotDetail:
             permitted_custodians=["Acme Manufacturing", "Northwind Logistics",
                                   "Harbor Retail DC"],
             products=[
-                LotProduct(serial="TT-DEMO-0001", status="In distribution",
+                LotProduct(serial="AL-DEMO-0001", status="In distribution",
                            custodian="Northwind → Harbor Retail DC", sale_state="unsold"),
-                LotProduct(serial="TT-DEMO-0002", status="Contested",
+                LotProduct(serial="AL-DEMO-0002", status="Contested",
                            custodian="Harbor Retail DC → Store 14", sale_state="unknown"),
             ],
             incidents=[
@@ -155,14 +155,14 @@ def get_blast_radius(lot_id: str) -> BlastRadius:
                     detail="Anchored · ANCH-DEMO-2", tone="neutral",
                     children=[
                         BlastNode(
-                            label="TT-DEMO-0001 · unsold",
+                            label="AL-DEMO-0001 · unsold",
                             detail="Northwind → Harbor Retail DC · in distribution",
-                            link="/verify/TT-DEMO-0001", tone="good",
+                            link="/verify/AL-DEMO-0001", tone="good",
                         ),
                         BlastNode(
-                            label="TT-DEMO-0002 · status unknown",
+                            label="AL-DEMO-0002 · status unknown",
                             detail="Contested · conflicting Oslo/Gdansk observations",
-                            link="/verify/TT-DEMO-0002", tone="critical",
+                            link="/verify/AL-DEMO-0002", tone="critical",
                             children=[
                                 BlastNode(label="INC-1042 · velocity conflict",
                                           detail="Impossible movement, 41 min apart",
@@ -229,7 +229,7 @@ def recall_lot(lot_id: str, reason: str = "", actor: str = "demo.recall-manager"
     entry = LotAuditEntry(at=_DEMO_AT, actor=actor,
                           action=f"Recall {key}",
                           outcome="recalled + frozen — pull-stock tasks queued (demo operation)",
-                          reason=reason.strip() or "Clone conflict on TT-DEMO-0002.")
+                          reason=reason.strip() or "Clone conflict on AL-DEMO-0002.")
     _audit(key).append(entry)
     return entry
 

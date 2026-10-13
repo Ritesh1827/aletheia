@@ -51,7 +51,7 @@ def test_lot_detail_renders(client: TestClient) -> None:
     res = client.get("/lots/LOT-DEMO-A")
     assert res.status_code == 200
     assert "LOT-DEMO-A" in res.text
-    assert "TT-DEMO-0001" in res.text
+    assert "AL-DEMO-0001" in res.text
     assert "INC-1042" in res.text
     assert "Blast radius" in res.text
 
@@ -73,7 +73,7 @@ def test_blast_radius_partial_counts(client: TestClient) -> None:
     assert res.status_code == 200
     assert "partial trace" in res.text
     assert "Only 2 of 10,000" in res.text
-    assert "/verify/TT-DEMO-0002" in res.text
+    assert "/verify/AL-DEMO-0002" in res.text
     assert "/incidents/INC-1042" in res.text
     assert "unlocated in demo" in res.text.lower()
 
@@ -136,7 +136,7 @@ def test_audit_json_labelled_demo(client: TestClient) -> None:
 
 
 def test_existing_pages_still_work(client: TestClient) -> None:
-    for path in ["/verify", "/verify/TT-DEMO-0001", "/overview", "/incidents",
+    for path in ["/verify", "/verify/AL-DEMO-0001", "/overview", "/incidents",
                  "/incidents/INC-1042", "/explorer", "/red-team"]:
         res = client.get(path)
         assert res.status_code == 200, path

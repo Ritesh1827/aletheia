@@ -22,7 +22,7 @@ def test_search_renders(client: TestClient) -> None:
 
 
 def test_verified_detail(client: TestClient) -> None:
-    res = client.get("/verify/TT-DEMO-0001", follow_redirects=False)
+    res = client.get("/verify/AL-DEMO-0001", follow_redirects=False)
     assert res.status_code == 200
     assert "VERIFIED" in res.text
     assert VERDICT_CAVEAT in res.text
@@ -30,7 +30,7 @@ def test_verified_detail(client: TestClient) -> None:
 
 
 def test_clone_detail_shows_evidence(client: TestClient) -> None:
-    res = client.get("/verify/TT-DEMO-0002", follow_redirects=False)
+    res = client.get("/verify/AL-DEMO-0002", follow_redirects=False)
     assert res.status_code == 200
     assert "CLONE DETECTED" in res.text
     assert "R-VELOCITY-04" in res.text
@@ -43,19 +43,19 @@ def test_unknown_serial_state(client: TestClient) -> None:
 
 
 def test_backend_error_state(client: TestClient) -> None:
-    res = client.get("/verify/TT-DEMO-ERR", follow_redirects=False)
+    res = client.get("/verify/AL-DEMO-ERR", follow_redirects=False)
     assert res.status_code == 502
     assert "not an all-clear" in res.text
 
 
 def test_search_redirects_known_serial(client: TestClient) -> None:
-    res = client.get("/verify", params={"q": "TT-DEMO-0001"}, follow_redirects=False)
+    res = client.get("/verify", params={"q": "AL-DEMO-0001"}, follow_redirects=False)
     assert res.status_code == 303
-    assert res.headers["location"] == "/verify/TT-DEMO-0001"
+    assert res.headers["location"] == "/verify/AL-DEMO-0001"
 
 
 def test_bundle_download(client: TestClient) -> None:
-    res = client.get("/verify/TT-DEMO-0001/bundle")
+    res = client.get("/verify/AL-DEMO-0001/bundle")
     assert res.status_code == 200
-    assert res.json()["serial"] == "TT-DEMO-0001"
+    assert res.json()["serial"] == "AL-DEMO-0001"
     assert "DEMO DATA" in res.json()["_demo_notice"]

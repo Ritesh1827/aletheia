@@ -44,7 +44,7 @@ def test_incidents_list_links_to_detail(client: TestClient) -> None:
     res = client.get("/incidents")
     assert res.status_code == 200
     assert "/incidents/INC-1042" in res.text
-    assert "/verify/TT-DEMO-0002" in res.text
+    assert "/verify/AL-DEMO-0002" in res.text
 
 
 def test_incident_detail_shows_conflict_and_timeline(client: TestClient) -> None:
@@ -87,7 +87,7 @@ def test_incident_action_redirects_with_notice(client: TestClient) -> None:
 
 
 def test_verify_page_unchanged(client: TestClient) -> None:
-    res = client.get("/verify/TT-DEMO-0001", follow_redirects=False)
+    res = client.get("/verify/AL-DEMO-0001", follow_redirects=False)
     assert res.status_code == 200
     assert "VERIFIED" in res.text
     assert VERDICT_CAVEAT in res.text

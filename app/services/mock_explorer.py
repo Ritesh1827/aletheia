@@ -75,7 +75,7 @@ class ExplorerBackendError(Exception):
 def network_status(mode: str = "live") -> NetworkStatus:
     if mode == "down":
         return NetworkStatus(
-            network_name="TrustTrace local demo network",
+            network_name="Aletheia local demo network",
             chain_id="31337",
             rpc="disconnected",
             latest_block=None,
@@ -87,7 +87,7 @@ def network_status(mode: str = "live") -> NetworkStatus:
         )
     if mode == "stale":
         return NetworkStatus(
-            network_name="TrustTrace local demo network",
+            network_name="Aletheia local demo network",
             chain_id="31337",
             rpc="connected",
             latest_block=BLOCK_B,
@@ -98,7 +98,7 @@ def network_status(mode: str = "live") -> NetworkStatus:
             retrieved_at="2026-10-11 22:04 UTC",
         )
     return NetworkStatus(
-        network_name="TrustTrace local demo network",
+        network_name="Aletheia local demo network",
         chain_id="31337",
         rpc="connected",
         latest_block=BLOCK_C,
@@ -115,12 +115,12 @@ def anchors() -> list[AnchorSummary]:
         AnchorSummary(
             anchor_id="ANCH-DEMO-2", block=BLOCK_B, tx_hash=TX_B,
             time="2026-10-02 08:11 UTC", root=ROOT_B, event_count=488,
-            lot_id="LOT-DEMO-A", serials=["TT-DEMO-0002"], state="anchored",
+            lot_id="LOT-DEMO-A", serials=["AL-DEMO-0002"], state="anchored",
         ),
         AnchorSummary(
             anchor_id="ANCH-DEMO-1", block=BLOCK_A, tx_hash=TX_A,
             time="2026-09-03 07:52 UTC", root=ROOT_A, event_count=512,
-            lot_id="LOT-DEMO-A", serials=["TT-DEMO-0001"], state="anchored",
+            lot_id="LOT-DEMO-A", serials=["AL-DEMO-0001"], state="anchored",
         ),
         AnchorSummary(
             anchor_id="BATCH-PENDING-3", block=None, tx_hash=None,
@@ -229,7 +229,7 @@ def get_tx(tx_hash: str) -> TxDetails:
             ],
             offchain_ids=["evt-0001", "evt-0002", "evt-0003", "evt-0004", "evt-0005", "evt-0006"],
             payload_missing=False, proof_status="NOT VERIFIED",
-            serials=["TT-DEMO-0001"], incident_id=None,
+            serials=["AL-DEMO-0001"], incident_id=None,
         )
     if key == TX_B.lower():
         return TxDetails(
@@ -242,7 +242,7 @@ def get_tx(tx_hash: str) -> TxDetails:
             ],
             offchain_ids=["evt-0010", "evt-0011", "evt-0012", "evt-0013", "evt-0014"],
             payload_missing=False, proof_status="NOT VERIFIED",
-            serials=["TT-DEMO-0002"], incident_id="INC-1042",
+            serials=["AL-DEMO-0002"], incident_id="INC-1042",
         )
     if key == TX_C.lower():
         return TxDetails(
@@ -302,7 +302,7 @@ def search(query: str) -> list[SearchHit]:
     if ql in {"lot-demo-a", "lot-demo-b"}:
         hits.append(SearchHit(kind="Lot", label=q.upper(),
                               detail="committed lot with recent anchors", link="/explorer"))
-    if ql in {"tt-demo-0001", "tt-demo-0002"}:
+    if ql in {"al-demo-0001", "al-demo-0002"}:
         hits.append(SearchHit(kind="Serial", label=q.upper(),
                               detail="verify this serial with full evidence", link=f"/verify/{q.upper()}"))
     if ql in {ACTOR_NORTHWIND.lower(), CONTRACT.lower(), ACTOR_UNKNOWN.lower()}:

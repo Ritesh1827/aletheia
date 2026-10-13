@@ -1,4 +1,4 @@
-# TrustTrace Web Application
+# Aletheia Web Application
 
 ## UI/UX, Design System, Component Architecture, RBAC, and Block Explorer Specification
 

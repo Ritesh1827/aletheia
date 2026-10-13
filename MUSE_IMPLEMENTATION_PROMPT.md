@@ -1,11 +1,11 @@
-# Muse Implementation Prompt: TrustTrace Web Application
+# Muse Implementation Prompt: Aletheia Web Application
 
 ## Project context
 
 You are implementing the **Web layer only** for a hackathon project
 called **Physical-to-Digital Anti-Counterfeit Trust Fabric**.
 
-Before editing code, read `TrustTrace_Web_UI_UX_Spec.md` in full. Treat
+Before editing code, read `Aletheia_Web_UI_UX_Spec.md` in full. Treat
 it as the source of truth for UI/UX, color tokens, typography, component
 architecture, pages, RBAC, the custom provenance Block Explorer, API
 boundaries, trust language, and implementation priorities.
@@ -34,7 +34,7 @@ Integrity
 ## Non-negotiable design rules
 
 1.  Follow the **Oxide Observatory** design system in
-    `TrustTrace_Web_UI_UX_Spec.md`.
+    `Aletheia_Web_UI_UX_Spec.md`.
 2.  Preserve the exact palette tokens and HEX values. Do not substitute
     generic purple/blue gradients, glowing blobs, excessive
     glassmorphism, or a default AI-dashboard style.
@@ -175,5 +175,5 @@ Screens/components completed. 3. Real API integrations versus mock data.
 useful step.
 
 **Begin with Stage 1: inspect the existing repository and read
-`TrustTrace_Web_UI_UX_Spec.md`. Do not immediately overwrite or
+`Aletheia_Web_UI_UX_Spec.md`. Do not immediately overwrite or
 regenerate the entire project.**

@@ -133,7 +133,7 @@ def test_explorer_error_mode(client: TestClient) -> None:
 
 
 def test_existing_pages_still_work(client: TestClient) -> None:
-    for path in ["/verify", "/verify/TT-DEMO-0001", "/incidents",
+    for path in ["/verify", "/verify/AL-DEMO-0001", "/incidents",
                  "/incidents/INC-1042", "/overview"]:
         res = client.get(path)
         assert res.status_code == 200, path
