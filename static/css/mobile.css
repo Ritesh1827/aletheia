@@ -281,10 +281,6 @@
   .brand-mini, .tabbar, .verify-dock, .to-top, .nav-scrim,
   .searchbar--mobile, .drawer-close, .carousel-hint, .topbar-actions { display: none !important; }
   .drawer-close { display: none !important; }
-  .menu-toggle { display: inline-flex !important; }
-  /* desktop sidebar collapse (hamburger) */
-  .shell.nav-collapsed { grid-template-columns: 1fr; }
-  .shell.nav-collapsed .sidebar { display: none; }
 }
 
 /* drawer close visible only on mobile (override desktop hide) */
