@@ -3,7 +3,7 @@
 {% block title %}Provenance Explorer · TrustTrace{% endblock %}
 {% block content %}
 <header class="page-head reveal">
-  <p class="eyebrow">04 · Provenance Explorer</p>
+  <p class="eyebrow">Provenance Explorer</p>
 </header>
 
 {% if load_error %}
@@ -64,8 +64,7 @@
 {% endif %}
 
 <section class="panel reveal reveal-2" aria-label="Network status">
-  <p class="eyebrow">Network · {{ net.network_name }}</p>
-  <h3>Chain status</h3>
+  <h3>Chain status · {{ net.network_name }}</h3>
   <dl class="kv">
     <dt>Network</dt><dd>{{ net.network_name }} <span class="hint">— local demo network, not mainnet</span></dd>
     <dt>Chain ID</dt><dd class="mono">{{ net.chain_id }}</dd>
@@ -79,8 +78,7 @@
 </section>
 
 <section class="panel reveal reveal-2" aria-label="Latest provenance anchors">
-  <p class="eyebrow">Anchors · page {{ data.anchor_page }} of {{ data.anchor_pages }}</p>
-  <h3>Latest provenance anchors</h3>
+  <h3>Latest provenance anchors · page {{ data.anchor_page }} of {{ data.anchor_pages }}</h3>
   <div class="table-wrap" role="region" aria-label="Anchors table" tabindex="0">
     <table class="queue">
       <thead>
@@ -113,7 +111,6 @@
 
 <div class="tower-grid">
   <section class="panel reveal reveal-2" aria-label="Recent registry events">
-    <p class="eyebrow">Chain · registry</p>
     <h3>Recent registry events</h3>
     <ol class="mini-feed">
       {% for e in data.events %}
@@ -127,7 +124,6 @@
   </section>
 
   <section class="panel reveal reveal-2" aria-label="Lots with recent anchors">
-    <p class="eyebrow">Stock · anchored lots</p>
     <h3>Lots with recent anchors</h3>
     <ul class="lot-list">
       {% for lot in data.lots %}
@@ -142,7 +138,6 @@
 </div>
 
 <section class="panel reveal reveal-3" aria-label="Anchor health">
-  <p class="eyebrow">Health · anchors</p>
   <h3>Anchor health</h3>
   <dl class="kv kv-tight">
     <dt>Successful anchors</dt><dd>2 batches (ANCH-DEMO-1 · ANCH-DEMO-2)</dd>
@@ -150,10 +145,6 @@
     <dt>Latest failure</dt><dd>None in demo window</dd>
   </dl>
   <p class="hint" style="margin:10px 0 0">Health is computed from the mock index — switch modes with <span class="mono">?mode=stale</span>, <span class="mono">?mode=down</span>, or <span class="mono">?mode=error</span> to preview honest failure states.</p>
-  <div class="action-row">
-    <a class="btn ghost" href="/explorer?mode=stale">Preview stale →</a>
-    <a class="btn ghost" href="/explorer?mode=down">Preview disconnected →</a>
-  </div>
 </section>
 {% endif %}
 {% endblock %}

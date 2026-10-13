@@ -71,7 +71,7 @@ def test_lot_unknown_is_404(client: TestClient) -> None:
 def test_blast_radius_partial_counts(client: TestClient) -> None:
     res = client.get("/lots/LOT-DEMO-A/blast-radius")
     assert res.status_code == 200
-    assert "PARTIAL TRACE" in res.text
+    assert "partial trace" in res.text
     assert "Only 2 of 10,000" in res.text
     assert "/verify/TT-DEMO-0002" in res.text
     assert "/incidents/INC-1042" in res.text
@@ -81,7 +81,7 @@ def test_blast_radius_partial_counts(client: TestClient) -> None:
 def test_blast_radius_unknown_state(client: TestClient) -> None:
     res = client.get("/lots/LOT-DEMO-B/blast-radius")
     assert res.status_code == 200
-    assert "UNKNOWN TRACE" in res.text
+    assert "unknown trace" in res.text
     assert "Nothing to trace yet" in res.text
 
 

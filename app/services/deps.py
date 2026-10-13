@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from app.models.access import AccessOverview
 from app.models.explorer import (
     AddressDetails,
     BlockDetails,
@@ -10,12 +11,18 @@ from app.models.explorer import (
     SearchHit,
     TxDetails,
 )
-from app.models.access import AccessOverview
 from app.models.lots import BlastRadius, LotAuditEntry, LotDetail, LotSummary
 from app.models.operations import ActionLogEntry, IncidentDetail, OverviewData
 from app.models.redteam import RedTeamLab, ScenarioResult
 from app.models.verify import VerificationVerdict
-from app.services import mock_access, mock_explorer, mock_lots, mock_operations, mock_redteam, mock_verify
+from app.services import (
+    mock_access,
+    mock_explorer,
+    mock_lots,
+    mock_operations,
+    mock_redteam,
+    mock_verify,
+)
 
 
 def get_verification(serial: str) -> VerificationVerdict:
@@ -105,3 +112,7 @@ def access_can(role_id: str | None, permission: str) -> bool:
 
 def access_role_id(role_id: str | None) -> str:
     return mock_access.normalize_role(role_id)
+
+
+def access_record_allowed(role_id: str | None, permission: str, target: str = "") -> None:
+    mock_access.record_allowed(role_id, permission, target)

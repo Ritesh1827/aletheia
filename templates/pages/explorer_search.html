@@ -33,8 +33,7 @@
 </div>
 {% elif hits %}
 <section class="panel reveal reveal-2" aria-label="Search results">
-  <p class="eyebrow">Results · {{ hits | length }} match{{ 'es' if hits | length != 1 else '' }} for “{{ q }}”</p>
-  <h3>Matches</h3>
+  <h3>{{ hits | length }} match{{ 'es' if hits | length != 1 else '' }} for “{{ q }}”</h3>
   <ul class="lot-list">
     {% for hit in hits %}
     <li>

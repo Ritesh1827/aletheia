@@ -149,7 +149,7 @@
     closeBtn.addEventListener("click", hideModal);
     if (closeX) closeX.addEventListener("click", hideModal);
     startBtn.addEventListener("click", startCamera);
-    stopBtn.addEventListener("click", function () { stopCamera(false); });
+    if (stopBtn) stopBtn.addEventListener("click", function () { stopCamera(false); });
     useBtn.addEventListener("click", useDecoded);
     modal.addEventListener("click", function (ev) {
       if (ev.target === modal) hideModal();
