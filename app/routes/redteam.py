@@ -8,6 +8,7 @@ from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
 from app import config
+from app.routes import session
 from app.services import deps
 from app.services.mock_redteam import (
     SCENARIO_IDS,
@@ -42,7 +43,7 @@ def _guard(request: Request) -> HTMLResponse | None:
         return templates.TemplateResponse(
             request,
             "pages/redteam.html",
-            {**shell("redteam"), "forbidden": True},
+            {**session.shell(request, "redteam"), "forbidden": True},
             status_code=403,
         )
     return None
@@ -65,7 +66,7 @@ def redteam_home(
     return templates.TemplateResponse(
         request,
         "pages/redteam.html",
-        {**shell("redteam"), "lab": lab, "selected": selected,
+        {**session.shell(request, "redteam"), "lab": lab, "selected": selected,
          "fields": fields, "ran": ran, "form_error": error},
     )
 
@@ -88,7 +89,7 @@ def redteam_scenario(
         return templates.TemplateResponse(
             request,
             "pages/redteam.html",
-            {**shell("redteam"), "lab": lab, "selected": "", "fields": [],
+            {**session.shell(request, "redteam"), "lab": lab, "selected": "", "fields": [],
              "ran": ran, "form_error": f"Unknown scenario: {scenario_id.strip()}."},
             status_code=404,
         )
@@ -105,7 +106,7 @@ def redteam_scenario(
     return templates.TemplateResponse(
         request,
         "pages/redteam_result.html",
-        {**shell("redteam"), "lab": lab, "meta": meta, "fields": fields,
+        {**session.shell(request, "redteam"), "lab": lab, "meta": meta, "fields": fields,
          "ran": ran, "result": last_result, "form_error": error},
     )
 
@@ -115,12 +116,16 @@ async def redteam_run(request: Request, scenario_id: str) -> Response:
     blocked = _guard(request)
     if blocked is not None:
         return blocked
+    denied = session.guard(request, "redteam:run", scenario_id.strip().lower(),
+                           active="redteam")
+    if denied is not None:
+        return denied
     key = scenario_id.strip().lower()
     if key not in SCENARIO_IDS:
         return templates.TemplateResponse(
             request,
             "pages/redteam.html",
-            {**shell("redteam"), "lab": deps.get_redteam_lab(),
+            {**session.shell(request, "redteam"), "lab": deps.get_redteam_lab(),
              "selected": "", "fields": [], "ran": "",
              "form_error": f"Unknown scenario: {scenario_id.strip()}."},
             status_code=404,
@@ -131,17 +136,20 @@ async def redteam_run(request: Request, scenario_id: str) -> Response:
     try:
         result = deps.run_redteam_scenario(key, inputs)
     except InvalidScenarioInputError as exc:
+        deps.audit_record(session.actor_id(request), "redteam:run", key,
+                          "rejected", {"reason": "invalid-input"})
         lab = deps.get_redteam_lab()
         meta = next(s for s in lab.scenarios if s.id == key)
         return templates.TemplateResponse(
             request,
             "pages/redteam_result.html",
-            {**shell("redteam"), "lab": lab, "meta": meta,
+            {**session.shell(request, "redteam"), "lab": lab, "meta": meta,
              "fields": lab.fields.get(key, []), "ran": ran,
              "result": None, "form_error": exc.detail},
             status_code=422,
         )
     _ = result
+    deps.audit_record(session.actor_id(request), "redteam:run", key, "allowed", {})
     seen = [s for s in ran.split(",") if s in SCENARIO_IDS] if ran else []
     if key not in seen:
         seen.append(key)
@@ -154,10 +162,17 @@ async def redteam_run(request: Request, scenario_id: str) -> Response:
 
 
 @router.get("/red-team/{scenario_id}/result", include_in_schema=False)
-def redteam_result_json(scenario_id: str) -> Response:
+def redteam_result_json(request: Request, scenario_id: str) -> Response:
     blocked_payload = not config.is_demo()
     if blocked_payload:
         return JSONResponse(status_code=403, content={"error": "Red-Team Lab is demo-only."})
+    denied = session.guard(request, "redteam:run", scenario_id.strip().lower(),
+                           active="redteam")
+    if denied is not None:
+        return JSONResponse(status_code=403, content={
+            "error": "Role lacks permission 'redteam:run'.",
+            "_demo_notice": "DEMO DATA — backend denial, never a result.",
+        })
     try:
         result = deps.run_redteam_scenario(scenario_id.strip().lower(), {})
     except UnknownScenarioError as exc:

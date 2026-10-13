@@ -7,8 +7,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Resp
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from app import config
 from app.models.verify import VERDICT_CAVEAT
+from app.routes import session
 from app.services import deps
 from app.services.mock_operations import MockOperationsError, UnknownIncidentError
 
@@ -19,14 +19,6 @@ templates = Jinja2Templates(directory="templates")
 class Notice(BaseModel):
     kind: str
     text: str
-
-
-def shell(active: str) -> dict[str, object]:
-    return {
-        "demo": config.is_demo(),
-        "chain_label": config.chain_label(),
-        "active": active,
-    }
 
 
 @router.get("/overview", response_class=HTMLResponse)
@@ -42,14 +34,14 @@ def overview(
         return templates.TemplateResponse(
             request,
             "pages/overview.html",
-            {**shell("overview"), "load_error": exc.correlation_id,
+            {**session.shell(request, "overview"), "load_error": exc.correlation_id,
              "severity": severity, "status": status},
             status_code=502,
         )
     return templates.TemplateResponse(
         request,
         "pages/overview.html",
-        {**shell("overview"), "data": data, "severity": severity, "status": status,
+        {**session.shell(request, "overview"), "data": data, "severity": severity, "status": status,
          "caveat": VERDICT_CAVEAT},
     )
 
@@ -66,14 +58,14 @@ def incidents(
         return templates.TemplateResponse(
             request,
             "pages/incidents.html",
-            {**shell("incidents"), "load_error": exc.correlation_id,
+            {**session.shell(request, "incidents"), "load_error": exc.correlation_id,
              "severity": severity, "status": status},
             status_code=502,
         )
     return templates.TemplateResponse(
         request,
         "pages/incidents.html",
-        {**shell("incidents"), "incidents": data.incidents,
+        {**session.shell(request, "incidents"), "incidents": data.incidents,
          "severity": severity, "status": status},
     )
 
@@ -95,18 +87,24 @@ def incident_export(incident_id: str) -> Response:
 @router.post("/incidents/{incident_id}/actions", include_in_schema=False)
 def incident_action(request: Request, incident_id: str, action: str = Query(default="note"),
                     note: str = Query(default="")) -> Response:
+    denied = session.guard(request, "incident:annotate", incident_id.strip().upper(),
+                           active="incidents")
+    if denied is not None:
+        return denied
     try:
-        entry = deps.record_incident_action(incident_id, action, note=note)
+        deps.record_incident_action(incident_id, action, note=note)
     except UnknownIncidentError:
         return templates.TemplateResponse(
             request,
             "pages/incidents.html",
-            {**shell("incidents"), "incidents": deps.get_overview().incidents,
+            {**session.shell(request, "incidents"), "incidents": deps.get_overview().incidents,
              "severity": "all", "status": "all",
              "not_found": incident_id.strip()},
             status_code=404,
         )
-    _ = entry
+    deps.audit_record(session.actor_id(request), "incident:annotate",
+                      incident_id.strip().upper(), "allowed",
+                      {"action": action, "note_present": str(bool(note.strip())).lower()})
     flag = "accepted" if action == "accept" else "noted"
     return RedirectResponse(url=f"/incidents/{incident_id.strip().upper()}?notice={flag}",
                             status_code=303)
@@ -124,7 +122,7 @@ def incident_detail(
         return templates.TemplateResponse(
             request,
             "pages/incidents.html",
-            {**shell("incidents"), "incidents": deps.get_overview().incidents,
+            {**session.shell(request, "incidents"), "incidents": deps.get_overview().incidents,
              "severity": "all", "status": "all",
              "not_found": incident_id.strip()},
             status_code=404,
@@ -133,7 +131,7 @@ def incident_detail(
         return templates.TemplateResponse(
             request,
             "pages/incidents.html",
-            {**shell("incidents"), "incidents": [],
+            {**session.shell(request, "incidents"), "incidents": [],
              "severity": "all", "status": "all",
              "load_error": exc.correlation_id},
             status_code=502,
@@ -146,5 +144,5 @@ def incident_detail(
     return templates.TemplateResponse(
         request,
         "pages/incident_detail.html",
-        {**shell("incidents"), "d": detail, "flash": flash, "caveat": VERDICT_CAVEAT},
+        {**session.shell(request, "incidents"), "d": detail, "flash": flash, "caveat": VERDICT_CAVEAT},
     )

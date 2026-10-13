@@ -40,7 +40,7 @@ def test_lab_unknown_scenario_is_404(client: TestClient) -> None:
 
 
 def test_clone_qr_detected(client: TestClient) -> None:
-    res = client.post("/red-team/clone-qr/run",
+    res = client.post("/red-team/clone-qr/run", params={"as": "operator"},
                       data={"serial": "TT-DEMO-0002", "gap_minutes": "41"},
                       follow_redirects=True)
     assert res.status_code == 200
@@ -131,21 +131,21 @@ def test_malformed_inputs_rejected() -> None:
 
 
 def test_run_post_invalid_input_is_422(client: TestClient) -> None:
-    res = client.post("/red-team/clone-qr/run",
+    res = client.post("/red-team/clone-qr/run", params={"as": "operator"},
                       data={"serial": "TT-DEMO-0002", "gap_minutes": "abc"})
     assert res.status_code == 422
     assert "must be a number" in res.text
 
 
 def test_run_post_unknown_scenario_is_404(client: TestClient) -> None:
-    res = client.post("/red-team/nope/run", data={})
+    res = client.post("/red-team/nope/run", params={"as": "operator"}, data={})
     assert res.status_code == 404
 
 
 def test_result_json_endpoint(client: TestClient) -> None:
-    res = client.get("/red-team/clone-qr/result")
+    res = client.get("/red-team/clone-qr/result", params={"as": "operator"})
     assert res.status_code == 422
-    res = client.get("/red-team/nope/result")
+    res = client.get("/red-team/nope/result", params={"as": "operator"})
     assert res.status_code == 404
 
 

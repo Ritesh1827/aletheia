@@ -78,14 +78,14 @@ def test_unknown_case_is_404_not_success(client: TestClient) -> None:
 
 
 def test_bad_action_is_404_page_not_500(client: TestClient) -> None:
-    res = client.post("/incidents/INC-1042/actions", params={"action": "bogus"})
+    res = client.post("/incidents/INC-1042/actions", params={"as": "investigator", "action": "bogus"})
     assert res.status_code == 404
     assert "Unknown case" in res.text
     assert "Internal Server Error" not in res.text
 
 
 def test_action_on_unknown_case_is_404_page_not_500(client: TestClient) -> None:
-    res = client.post("/incidents/INC-9999/actions", params={"action": "note"})
+    res = client.post("/incidents/INC-9999/actions", params={"as": "investigator", "action": "note"})
     assert res.status_code == 404
     assert "Unknown case" in res.text
 

@@ -27,6 +27,11 @@ def current_role(request: Request) -> str:
     return deps.access_role_id(request.cookies.get(SESSION_COOKIE))
 
 
+def actor_id(request: Request) -> str:
+    """Demo actor identity for audit records (never a secret)."""
+    return str(deps.access_overview(current_role(request)).current_user.id)
+
+
 def session_context(request: Request) -> dict[str, object]:
     role_id = current_role(request)
     data = deps.access_overview(role_id)
@@ -61,6 +66,8 @@ def guard(
     try:
         deps.access_require(role_id, permission, target)
     except ForbiddenError as exc:
+        actor = str(deps.access_overview(role_id).current_user.id)
+        deps.audit_record(actor, permission, target, "denied", {})
         data = deps.access_overview(role_id)
         return templates.TemplateResponse(
             request,

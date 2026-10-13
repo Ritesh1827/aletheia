@@ -1,0 +1,28 @@
+{% extends "layouts/base.html" %}
+{% block title %}Not permitted · TrustTrace{% endblock %}
+{% block content %}
+<nav class="crumbs reveal" aria-label="Breadcrumb">
+  <a href="/access">Access Control</a><span aria-hidden="true">/</span><span>denied</span>
+</nav>
+
+<section class="panel hero reveal reveal-1" aria-label="Permission denied">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Backend denial · demo session</span>
+  </div>
+  <h1>Not permitted for this role.</h1>
+  <p class="lede">The server refused the request — hiding the button would never have been enough.
+    {% if target %}Target: <span class="mono">{{ target }}</span>.{% endif %}</p>
+  <dl class="kv">
+    <dt>Missing permission</dt><dd class="mono">{{ permission }}</dd>
+    <dt>Current role</dt><dd>{{ role.name }} <span class="hint">({{ role.id }})</span></dd>
+    <dt>Status</dt><dd><span class="badge watch"><span class="dot" aria-hidden="true"></span>403 DENIED</span></dd>
+  </dl>
+  <p class="hint" style="margin:12px 0 0">This denial was recorded in the demo access audit. Switch to a role that holds
+    <span class="mono">{{ permission }}</span> in Access Control — role switching here is a demo convenience, not identity verification.</p>
+  <div class="action-row">
+    <a class="btn primary" href="/access">Open Access Control</a>
+    <a class="btn ghost" href="/verify">Back to Verify</a>
+  </div>
+</section>
+{% endblock %}

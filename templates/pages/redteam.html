@@ -66,9 +66,16 @@
     </div>
     {% endfor %}
     <div class="action-row">
+      {% if can('redteam:run') %}
       <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Run scenario</button>
+      {% else %}
+      <button class="btn primary" type="button" disabled aria-disabled="true" title="Requires the redteam:run permission — switch roles in Access Control">Run scenario</button>
+      {% endif %}
       <a class="btn ghost" href="/red-team{% if ran %}?ran={{ ran }}{% endif %}">Back to scenarios</a>
     </div>
+    {% if not can('redteam:run') %}
+    <p class="hint" style="margin:8px 0 0">Running scenarios requires the <span class="mono">redteam:run</span> permission ({{ role_name }} lacks it). The server enforces this.</p>
+    {% endif %}
   </form>
 </section>
 {% endif %}

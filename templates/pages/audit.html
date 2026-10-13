@@ -1,0 +1,114 @@
+{% extends "layouts/base.html" %}
+{% block title %}Audit & Integrity · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">Audit &amp; Integrity · hash-chained demo log</p>
+</header>
+
+{% if report.status == 'FAIL' %}
+<div class="alert error reveal" role="alert">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/></svg>
+  <div>
+    <strong>Integrity verification FAILED.</strong>
+    <p>{{ report.note }} Treat the affected history as unproven — this is not an all-clear.</p>
+  </div>
+</div>
+{% elif report.status == 'PASS' %}
+<div class="alert info reveal" role="status">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+  <div><strong>Integrity verification passed.</strong><p>{{ report.note }}</p></div>
+</div>
+{% else %}
+<div class="alert warn reveal" role="note">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <div><strong>Integrity not verified.</strong><p>{{ report.note }}</p></div>
+</div>
+{% endif %}
+
+<section class="panel hero reveal reveal-1" aria-label="Integrity verification">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Verification · recomputed server-side on every load · demo data</span>
+  </div>
+  <h1>{{ report.status }}: {{ report.checked }} record{{ '' if report.checked == 1 else 's' }} checked.</h1>
+  <p class="lede">Each audit record commits to the hash of the previous one. Verification recomputes every
+    hash and link in this backend — the browser never decides validity. Integrity covers records and
+    commitments only; it says nothing about whether a physical item is genuine.</p>
+  <dl class="kv">
+    <dt>Status</dt>
+    <dd>{% if report.status == 'PASS' %}<span class="badge good"><span class="dot" aria-hidden="true"></span>PASS</span>{% elif report.status == 'FAIL' %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>FAIL</span>{% else %}<span class="badge neutral"><span class="dot" aria-hidden="true"></span>NOT VERIFIED</span>{% endif %}</dd>
+    <dt>Checked</dt><dd>{{ report.checked }} record{{ '' if report.checked == 1 else 's' }}</dd>
+    <dt>Verified at</dt><dd class="mono">{{ report.verified_at or '—' }}</dd>
+  </dl>
+  {% if report.failures %}
+  <div class="table-wrap" role="region" aria-label="Integrity failures" tabindex="0" style="margin-top:12px">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Event</th><th scope="col">Problem</th><th scope="col">Expected</th><th scope="col">Stored</th></tr>
+      </thead>
+      <tbody>
+        {% for f in report.failures %}
+        <tr>
+          <td class="mono">{{ f.event_id }} · seq {{ f.seq }}</td>
+          <td>{{ f.reason }}</td>
+          <td class="mono">{{ f.expected[:22] }}…</td>
+          <td class="mono">{{ f.actual[:22] }}…</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</section>
+
+<section class="panel reveal reveal-2" aria-label="Audit log">
+  <p class="eyebrow">Log · {{ events | length }} shown · actor, action, target, outcome</p>
+  <h3>Audit log</h3>
+  <form class="queue-filters" action="/audit" method="get" aria-label="Filter audit log">
+    <label>Outcome
+      <select name="outcome" onchange="this.form.submit()">
+        {% for opt in ['all','allowed','denied','rejected'] %}
+        <option value="{{ opt }}" {% if outcome == opt %}selected{% endif %}>{{ opt }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Action contains
+      <input name="action" type="search" value="{{ action | e }}" placeholder="e.g. lot:freeze" aria-label="Filter by action" />
+    </label>
+    <label>Actor contains
+      <input name="actor" type="search" value="{{ actor | e }}" placeholder="e.g. demo.admin" aria-label="Filter by actor" />
+    </label>
+    <button class="btn secondary" type="submit">Filter</button>
+    <a class="btn ghost" href="/audit">Clear</a>
+  </form>
+  {% if events %}
+  <div class="table-wrap" role="region" aria-label="Audit events table" tabindex="0">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Event</th><th scope="col">Time</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Target</th><th scope="col">Outcome</th><th scope="col">Record hash</th></tr>
+      </thead>
+      <tbody>
+        {% for e in events %}
+        <tr>
+          <td class="mono">{{ e.event_id }}</td>
+          <td class="mono">{{ e.at }}</td>
+          <td class="mono">{{ e.actor }}</td>
+          <td class="mono">{{ e.action }}</td>
+          <td class="mono">{{ e.target or '—' }}</td>
+          <td>{% if e.outcome == 'denied' or e.outcome == 'rejected' %}<span class="stat-pill i-fail">{{ e.outcome }}</span>{% else %}<span class="stat-pill i-pass">{{ e.outcome }}</span>{% endif %}</td>
+          <td class="mono">{{ e.record_hash[:14] }}…{{ e.record_hash[-6:] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin:10px 0 0">Full hashes recomputed on every load. Free-text notes and reasons are never
+    stored here — only identifiers, actions, outcomes, and presence flags. No passwords, keys, or session secrets.</p>
+  {% else %}
+  <div class="alert info" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+    <div><strong>No events match these filters.</strong><p>Loosen the filters — an empty result means “no matches”, never “nothing happened”.</p></div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

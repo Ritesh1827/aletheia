@@ -1,0 +1,122 @@
+{% extends "layouts/base.html" %}
+{% block title %}Access Control · TrustTrace{% endblock %}
+{% block content %}
+<header class="page-head reveal">
+  <p class="eyebrow">Access Control · demo session</p>
+</header>
+
+{% if flash %}
+<div class="alert info reveal" role="status">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4m0-4h.01"/></svg>
+  <div><strong>Demo session updated.</strong><p>{{ flash.text }}</p></div>
+</div>
+{% endif %}
+
+<section class="panel hero reveal reveal-1" aria-label="Current demo session">
+  <div class="kicker">
+    <span class="rule-accent" aria-hidden="true"></span>
+    <span class="eyebrow">Session · {{ overview.current_user.id }} · demo data</span>
+  </div>
+  <h1>Acting as {{ overview.current_role.name }}.</h1>
+  <p class="lede">{{ overview.current_role.purpose }} Every privileged action below is enforced by the
+    server — hidden buttons are never the boundary. Role switching here is a labelled demo convenience,
+    not identity verification; there is no production login in this prototype.</p>
+  <form action="/access/role" method="post" aria-label="Switch demo role">
+    <input type="hidden" name="next" value="/access" />
+    <div class="queue-filters" style="margin-bottom:0">
+      <label>Demo role
+        <select name="role_id">
+          {% for r in overview.roles %}
+          <option value="{{ r.id }}" {% if r.id == overview.current_role.id %}selected{% endif %}>{{ r.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <button class="btn primary" type="submit">Switch role</button>
+    </div>
+  </form>
+</section>
+
+<section class="panel reveal reveal-2" aria-label="Permission matrix">
+  <p class="eyebrow">Policy · {{ overview.permissions | length }} permissions × {{ overview.roles | length }} roles</p>
+  <h3>Permission matrix</h3>
+  <p class="hint">Read a row to see which roles hold a permission. Denials render a 403 page and are recorded in the audit below.</p>
+  <div class="table-wrap" role="region" aria-label="Permission matrix table" tabindex="0">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Permission</th>
+          {% for r in overview.roles %}<th scope="col">{{ r.name }}</th>{% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for perm in overview.permissions %}
+        <tr>
+          <td class="mono">{{ perm }}</td>
+          {% for r in overview.roles %}
+          <td>{% if overview.matrix[perm][r.id] %}<span class="stat-pill i-pass">yes</span>{% else %}<span class="stat-pill">no</span>{% endif %}</td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<div class="tower-grid">
+  <section class="panel reveal reveal-2" aria-label="Roles">
+    <p class="eyebrow">Roles · {{ overview.roles | length }}</p>
+    <h3>Roles</h3>
+    <ul class="lot-list">
+      {% for r in overview.roles %}
+      <li>
+        <span><strong>{{ r.name }}</strong> <span class="mono">{{ r.id }}</span>{% if r.id == overview.current_role.id %} <span class="stat-pill s-triaged">current</span>{% endif %}</span>
+        <span>{{ r.purpose }}</span>
+        <span class="hint">{{ r.permissions | length }} permissions: {{ r.permissions | join(', ') if r.permissions else '—' }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  <section class="panel reveal reveal-2" aria-label="Demo users">
+    <p class="eyebrow">Users · {{ overview.users | length }} · demo only</p>
+    <h3>Demo users</h3>
+    <ul class="lot-list">
+      {% for u in overview.users %}
+      <li>
+        <span class="mono">{{ u.id }}</span>
+        <span>{{ u.name }} · {{ u.organization }} · role <span class="mono">{{ u.role_id }}</span> · {{ u.status }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    <p class="hint" style="margin:10px 0 0">No user administration exists in this prototype — the table above is the full
+      demo directory, and role changes here only switch the demo session.</p>
+  </section>
+</div>
+
+<section class="panel reveal reveal-3" aria-label="Access audit">
+  <p class="eyebrow">Audit · {{ overview.audit | length }} entries · allowed and denied</p>
+  <h3>Access audit</h3>
+  {% if overview.audit %}
+  <div class="table-wrap" role="region" aria-label="Access audit table" tabindex="0">
+    <table class="queue">
+      <thead>
+        <tr><th scope="col">Time</th><th scope="col">Actor</th><th scope="col">Action</th><th scope="col">Target</th><th scope="col">Outcome</th><th scope="col">Request</th></tr>
+      </thead>
+      <tbody>
+        {% for a in overview.audit %}
+        <tr>
+          <td class="mono">{{ a.at }}</td>
+          <td class="mono">{{ a.actor }}</td>
+          <td class="mono">{{ a.action }}</td>
+          <td class="mono">{{ a.target or '—' }}</td>
+          <td>{% if a.outcome == 'denied' %}<span class="stat-pill i-fail">denied</span>{% else %}<span class="stat-pill i-pass">{{ a.outcome }}</span>{% endif %}</td>
+          <td class="mono">{{ a.request_id or '—' }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="hint" style="margin:0">No access decisions recorded in this demo session yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

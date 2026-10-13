@@ -5,30 +5,15 @@ from __future__ import annotations
 from fastapi import APIRouter, Query, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
 
-from app import config
 from app.models.verify import VERDICT_CAVEAT, VERDICT_LABELS
+from app.routes import session
 from app.services import deps
 from app.services.mock_verify import MockBackendError, UnknownSerialError
 from app.services.scan_parse import parse_scan_payload
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
-
-class ShellContext(BaseModel):
-    demo: bool
-    chain_label: str
-    active: str
-
-
-def shell(active: str) -> dict[str, object]:
-    return {
-        "demo": config.is_demo(),
-        "chain_label": config.chain_label(),
-        "active": active,
-    }
 
 
 @router.get("/", include_in_schema=False)
@@ -52,20 +37,20 @@ def verify_search(
             return templates.TemplateResponse(
                 request,
                 "pages/verify_search.html",
-                {**shell("verify"), "q": q, "not_found": lookup,
+                {**session.shell(request, "verify"), "q": q, "not_found": lookup,
                  "scan_note": parsed.explanation if parsed.status == "ambiguous" else ""},
             )
         except MockBackendError as exc:
             return templates.TemplateResponse(
                 request,
                 "pages/verify_search.html",
-                {**shell("verify"), "q": q, "backend_error": exc.correlation_id},
+                {**session.shell(request, "verify"), "q": q, "backend_error": exc.correlation_id},
             )
         return RedirectResponse(url=f"/verify/{verdict.serial}", status_code=303)
     return templates.TemplateResponse(
         request,
         "pages/verify_search.html",
-        {**shell("verify"), "q": q, "form_error": error},
+        {**session.shell(request, "verify"), "q": q, "form_error": error},
     )
 
 
@@ -77,21 +62,21 @@ def verify_detail(request: Request, serial: str) -> HTMLResponse:
         return templates.TemplateResponse(
             request,
             "pages/verify_search.html",
-            {**shell("verify"), "q": serial, "not_found": serial.strip()},
+            {**session.shell(request, "verify"), "q": serial, "not_found": serial.strip()},
             status_code=404,
         )
     except MockBackendError as exc:
         return templates.TemplateResponse(
             request,
             "pages/verify_search.html",
-            {**shell("verify"), "q": serial, "backend_error": exc.correlation_id},
+            {**session.shell(request, "verify"), "q": serial, "backend_error": exc.correlation_id},
             status_code=502,
         )
     return templates.TemplateResponse(
         request,
         "pages/verify_detail.html",
         {
-            **shell("verify"),
+            **session.shell(request, "verify"),
             "v": verdict,
             "verdict_label": VERDICT_LABELS[verdict.verdict],
             "caveat": VERDICT_CAVEAT,

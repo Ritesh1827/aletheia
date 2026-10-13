@@ -118,6 +118,7 @@
     <div class="panel" x-data="{ confirmFreeze: false, confirmRecall: false }">
       <h3>Freeze &amp; recall</h3>
       <p class="hint">Demo operations only. State changes after the service confirms; repeats are idempotent.</p>
+      {% if can('lot:freeze') %}
       <form action="/lots/{{ lot.lot_id }}/freeze" method="post" x-show="!confirmFreeze">
         <div class="action-row">
           <button class="btn outline" type="button" @click="confirmFreeze = true" {% if lot.freeze_state == 'frozen' %}disabled aria-disabled="true" title="Already frozen — repeat confirmations are recorded as idempotent"{% endif %}>
@@ -140,6 +141,13 @@
           <button class="btn ghost" type="button" @click="confirmFreeze = false">Cancel</button>
         </div>
       </form>
+      {% else %}
+      <div class="alert warn" role="note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div><strong>Freeze unavailable for {{ role_name }}.</strong><p>Requires the <span class="mono">lot:freeze</span> permission. The server enforces this — switch roles in <a href="/access">Access Control</a> to act.</p></div>
+      </div>
+      {% endif %}
+      {% if can('lot:recall') %}
       <form action="/lots/{{ lot.lot_id }}/recall" method="post" x-show="!confirmRecall" style="margin-top:10px">
         <div class="action-row">
           <button class="btn danger" type="button" @click="confirmRecall = true" {% if lot.recall_state == 'recalled' %}disabled aria-disabled="true" title="Already recalled — repeat confirmations are recorded as idempotent"{% endif %}>
@@ -162,6 +170,12 @@
           <button class="btn ghost" type="button" @click="confirmRecall = false">Cancel</button>
         </div>
       </form>
+      {% else %}
+      <div class="alert warn" role="note" style="margin-top:10px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+        <div><strong>Recall unavailable for {{ role_name }}.</strong><p>Requires the <span class="mono">lot:recall</span> permission (Admin only in this demo). The server enforces this — switch roles in <a href="/access">Access Control</a> to act.</p></div>
+      </div>
+      {% endif %}
     </div>
   </aside>
 </div>

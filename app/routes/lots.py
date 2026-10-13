@@ -7,8 +7,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from app import config
 from app.models.verify import VERDICT_CAVEAT
+from app.routes import session
 from app.services import deps
 from app.services.mock_lots import LotsBackendError, UnknownLotError
 
@@ -19,14 +19,6 @@ templates = Jinja2Templates(directory="templates")
 class LotsNotice(BaseModel):
     kind: str
     text: str
-
-
-def shell(active: str) -> dict[str, object]:
-    return {
-        "demo": config.is_demo(),
-        "chain_label": config.chain_label(),
-        "active": active,
-    }
 
 
 @router.get("/lots", response_class=HTMLResponse)
@@ -43,7 +35,7 @@ def lots_home(
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "load_error": exc.correlation_id,
+            {**session.shell(request, "lots"), "load_error": exc.correlation_id,
              "q": q, "freeze": freeze, "page": 1, "pages": 1, "lots": []},
             status_code=502,
         )
@@ -54,7 +46,7 @@ def lots_home(
     return templates.TemplateResponse(
         request,
         "pages/lots.html",
-        {**shell("lots"), "lots": window, "total": len(lots),
+        {**session.shell(request, "lots"), "lots": window, "total": len(lots),
          "q": q, "freeze": freeze, "page": page, "pages": pages},
     )
 
@@ -68,7 +60,7 @@ def lot_blast_radius(request: Request, lot_id: str) -> HTMLResponse:
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "lots": deps.list_lots(), "total": 2,
+            {**session.shell(request, "lots"), "lots": deps.list_lots(), "total": 2,
              "q": "", "freeze": "all", "page": 1, "pages": 1,
              "not_found": lot_id.strip()},
             status_code=404,
@@ -77,72 +69,88 @@ def lot_blast_radius(request: Request, lot_id: str) -> HTMLResponse:
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "load_error": exc.correlation_id,
+            {**session.shell(request, "lots"), "load_error": exc.correlation_id,
              "q": "", "freeze": "all", "page": 1, "pages": 1, "lots": []},
             status_code=502,
         )
     return templates.TemplateResponse(
         request,
         "pages/lot_blast.html",
-        {**shell("lots"), "lot": detail, "blast": blast, "caveat": VERDICT_CAVEAT},
+        {**session.shell(request, "lots"), "lot": detail, "blast": blast, "caveat": VERDICT_CAVEAT},
     )
 
 
 @router.post("/lots/{lot_id}/freeze", include_in_schema=False)
 async def lot_freeze(request: Request, lot_id: str) -> Response:
+    denied = session.guard(request, "lot:freeze", lot_id.strip().upper(), active="lots")
+    if denied is not None:
+        return denied
     form = await request.form()
     reason = str(form.get("reason", ""))
     confirmed = str(form.get("confirm", ""))
     if confirmed != lot_id.strip().upper():
+        deps.audit_record(session.actor_id(request), "lot:freeze", lot_id.strip().upper(),
+                          "rejected", {"reason": "confirm-mismatch"})
         return templates.TemplateResponse(
             request,
             "pages/lot_detail.html",
-            {**shell("lots"), "lot": deps.get_lot(lot_id), "blast": None,
+            {**session.shell(request, "lots"), "lot": deps.get_lot(lot_id), "blast": None,
              "caveat": VERDICT_CAVEAT,
              "form_error": "Confirmation did not match the lot ID — no action taken."},
             status_code=422,
         )
     try:
-        entry = deps.freeze_lot(lot_id, reason)
+        entry = deps.freeze_lot(lot_id, reason, actor=session.actor_id(request))
     except UnknownLotError:
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "lots": deps.list_lots(), "total": 2,
+            {**session.shell(request, "lots"), "lots": deps.list_lots(), "total": 2,
              "q": "", "freeze": "all", "page": 1, "pages": 1,
              "not_found": lot_id.strip()},
             status_code=404,
         )
     _ = entry
+    deps.audit_record(session.actor_id(request), "lot:freeze", lot_id.strip().upper(),
+                      "allowed", {"reason_given": str(bool(reason.strip())).lower(),
+                                  "idempotent_repeat": str(entry.outcome.startswith("already-")).lower()})
     return Response(status_code=303, headers={"Location": f"/lots/{lot_id.strip().upper()}?notice=frozen"})
 
 
 @router.post("/lots/{lot_id}/recall", include_in_schema=False)
 async def lot_recall(request: Request, lot_id: str) -> Response:
+    denied = session.guard(request, "lot:recall", lot_id.strip().upper(), active="lots")
+    if denied is not None:
+        return denied
     form = await request.form()
     reason = str(form.get("reason", ""))
     confirmed = str(form.get("confirm", ""))
     if confirmed != lot_id.strip().upper():
+        deps.audit_record(session.actor_id(request), "lot:recall", lot_id.strip().upper(),
+                          "rejected", {"reason": "confirm-mismatch"})
         return templates.TemplateResponse(
             request,
             "pages/lot_detail.html",
-            {**shell("lots"), "lot": deps.get_lot(lot_id), "blast": None,
+            {**session.shell(request, "lots"), "lot": deps.get_lot(lot_id), "blast": None,
              "caveat": VERDICT_CAVEAT,
              "form_error": "Confirmation did not match the lot ID — no action taken."},
             status_code=422,
         )
     try:
-        entry = deps.recall_lot(lot_id, reason)
+        entry = deps.recall_lot(lot_id, reason, actor=session.actor_id(request))
     except UnknownLotError:
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "lots": deps.list_lots(), "total": 2,
+            {**session.shell(request, "lots"), "lots": deps.list_lots(), "total": 2,
              "q": "", "freeze": "all", "page": 1, "pages": 1,
              "not_found": lot_id.strip()},
             status_code=404,
         )
     _ = entry
+    deps.audit_record(session.actor_id(request), "lot:recall", lot_id.strip().upper(),
+                      "allowed", {"reason_given": str(bool(reason.strip())).lower(),
+                                  "idempotent_repeat": str(entry.outcome.startswith("already-")).lower()})
     return Response(status_code=303, headers={"Location": f"/lots/{lot_id.strip().upper()}?notice=recalled"})
 
 
@@ -158,7 +166,7 @@ def lot_detail(
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "lots": deps.list_lots(), "total": 2,
+            {**session.shell(request, "lots"), "lots": deps.list_lots(), "total": 2,
              "q": "", "freeze": "all", "page": 1, "pages": 1,
              "not_found": lot_id.strip()},
             status_code=404,
@@ -167,7 +175,7 @@ def lot_detail(
         return templates.TemplateResponse(
             request,
             "pages/lots.html",
-            {**shell("lots"), "load_error": exc.correlation_id,
+            {**session.shell(request, "lots"), "load_error": exc.correlation_id,
              "q": "", "freeze": "all", "page": 1, "pages": 1, "lots": []},
             status_code=502,
         )
@@ -179,7 +187,7 @@ def lot_detail(
     return templates.TemplateResponse(
         request,
         "pages/lot_detail.html",
-        {**shell("lots"), "lot": detail, "flash": flash,
+        {**session.shell(request, "lots"), "lot": detail, "flash": flash,
          "caveat": VERDICT_CAVEAT, "form_error": ""},
     )
 

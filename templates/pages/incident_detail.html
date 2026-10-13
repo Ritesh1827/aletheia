@@ -141,6 +141,7 @@
         <label class="field" style="display:block;margin-bottom:4px" for="note-{{ d.id }}">Note
           <textarea class="note-input" id="note-{{ d.id }}" name="note" rows="3" x-model="note" placeholder="Observation, call reference, photo ID…"></textarea>
         </label>
+        {% if can('incident:annotate') %}
         <div class="action-row">
           <button class="btn secondary" type="submit" formaction="/incidents/{{ d.id }}/actions?action=note" formmethod="post" :disabled="note.trim() === ''" :aria-disabled="(note.trim() === '').toString()">Add note</button>
           {% if d.status != 'resolved' %}
@@ -148,6 +149,15 @@
           {% endif %}
           <a class="btn ghost" href="/incidents/{{ d.id }}/export" download="case-{{ d.id }}.json">Export case JSON</a>
         </div>
+        {% else %}
+        <div class="alert warn" role="note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+          <div><strong>Case actions unavailable for {{ role_name }}.</strong><p>Requires the <span class="mono">incident:annotate</span> permission. The server enforces this — switch roles in <a href="/access">Access Control</a> to act. Export stays available below.</p></div>
+        </div>
+        <div class="action-row">
+          <a class="btn ghost" href="/incidents/{{ d.id }}/export" download="case-{{ d.id }}.json">Export case JSON</a>
+        </div>
+        {% endif %}
       </form>
     </div>
   </aside>

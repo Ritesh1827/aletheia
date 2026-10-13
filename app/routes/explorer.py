@@ -7,7 +7,7 @@ from fastapi.responses import HTMLResponse, JSONResponse, Response
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
-from app import config
+from app.routes import session
 from app.services import deps
 from app.services.mock_explorer import ExplorerBackendError, UnknownRecordError
 
@@ -18,14 +18,6 @@ templates = Jinja2Templates(directory="templates")
 class ExplorerNotice(BaseModel):
     kind: str
     text: str
-
-
-def shell(active: str) -> dict[str, object]:
-    return {
-        "demo": config.is_demo(),
-        "chain_label": config.chain_label(),
-        "active": active,
-    }
 
 
 @router.get("/explorer", response_class=HTMLResponse)
@@ -42,7 +34,7 @@ def explorer_home(
             return templates.TemplateResponse(
                 request,
                 "pages/explorer_search.html",
-                {**shell("explorer"), "q": q, "hits": hits, "single": True},
+                {**session.shell(request, "explorer"), "q": q, "hits": hits, "single": True},
             )
         try:
             data = deps.get_explorer_overview(page=page, mode=mode)
@@ -50,7 +42,7 @@ def explorer_home(
             return templates.TemplateResponse(
                 request,
                 "pages/explorer.html",
-                {**shell("explorer"), "load_error": exc.correlation_id,
+                {**session.shell(request, "explorer"), "load_error": exc.correlation_id,
                  "q": q, "hits": hits, "page": page, "mode": mode},
                 status_code=502,
             )
@@ -59,7 +51,7 @@ def explorer_home(
         return templates.TemplateResponse(
             request,
             "pages/explorer.html",
-            {**shell("explorer"), "data": data, "q": q, "page": page, "mode": mode},
+            {**session.shell(request, "explorer"), "data": data, "q": q, "page": page, "mode": mode},
         )
     try:
         data = deps.get_explorer_overview(page=page, mode=mode)
@@ -67,14 +59,14 @@ def explorer_home(
         return templates.TemplateResponse(
             request,
             "pages/explorer.html",
-            {**shell("explorer"), "load_error": exc.correlation_id,
+            {**session.shell(request, "explorer"), "load_error": exc.correlation_id,
              "q": q, "page": page, "mode": mode},
             status_code=502,
         )
     return templates.TemplateResponse(
         request,
         "pages/explorer.html",
-        {**shell("explorer"), "data": data, "q": q, "page": page, "mode": mode},
+        {**session.shell(request, "explorer"), "data": data, "q": q, "page": page, "mode": mode},
     )
 
 
@@ -86,12 +78,12 @@ def explorer_search(request: Request, q: str = Query(default="")) -> HTMLRespons
         return templates.TemplateResponse(
             request,
             "pages/explorer_search.html",
-            {**shell("explorer"), "q": q, "hits": hits, "single": True},
+            {**session.shell(request, "explorer"), "q": q, "hits": hits, "single": True},
         )
     return templates.TemplateResponse(
         request,
         "pages/explorer_search.html",
-        {**shell("explorer"), "q": q, "hits": hits, "single": False},
+        {**session.shell(request, "explorer"), "q": q, "hits": hits, "single": False},
     )
 
 
@@ -103,14 +95,14 @@ def explorer_block(request: Request, block_id: str) -> HTMLResponse:
         return templates.TemplateResponse(
             request,
             "pages/explorer_search.html",
-            {**shell("explorer"), "q": block_id.strip(), "hits": [],
+            {**session.shell(request, "explorer"), "q": block_id.strip(), "hits": [],
              "single": False, "not_found": block_id.strip()},
             status_code=404,
         )
     return templates.TemplateResponse(
         request,
         "pages/explorer_block.html",
-        {**shell("explorer"), "block": block},
+        {**session.shell(request, "explorer"), "block": block},
     )
 
 
@@ -139,7 +131,7 @@ def explorer_tx(
         return templates.TemplateResponse(
             request,
             "pages/explorer_search.html",
-            {**shell("explorer"), "q": tx_hash.strip(), "hits": [],
+            {**session.shell(request, "explorer"), "q": tx_hash.strip(), "hits": [],
              "single": False, "not_found": tx_hash.strip()},
             status_code=404,
         )
@@ -156,7 +148,7 @@ def explorer_tx(
     return templates.TemplateResponse(
         request,
         "pages/explorer_tx.html",
-        {**shell("explorer"), "tx": detail, "proof": proof,
+        {**session.shell(request, "explorer"), "tx": detail, "proof": proof,
          "verifying": verify == "1", "flash": flash},
     )
 
@@ -169,12 +161,12 @@ def explorer_address(request: Request, address: str) -> HTMLResponse:
         return templates.TemplateResponse(
             request,
             "pages/explorer_search.html",
-            {**shell("explorer"), "q": address.strip(), "hits": [],
+            {**session.shell(request, "explorer"), "q": address.strip(), "hits": [],
              "single": False, "not_found": address.strip()},
             status_code=404,
         )
     return templates.TemplateResponse(
         request,
         "pages/explorer_address.html",
-        {**shell("explorer"), "info": info},
+        {**session.shell(request, "explorer"), "info": info},
     )

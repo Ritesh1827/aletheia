@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app.models.access import AccessOverview
+from app.models.audit import AuditEvent, IntegrityReport
 from app.models.explorer import (
     AddressDetails,
     BlockDetails,
@@ -17,6 +18,7 @@ from app.models.redteam import RedTeamLab, ScenarioResult
 from app.models.verify import VerificationVerdict
 from app.services import (
     mock_access,
+    mock_audit,
     mock_explorer,
     mock_lots,
     mock_operations,
@@ -90,12 +92,12 @@ def get_blast_radius(lot_id: str) -> BlastRadius:
     return mock_lots.get_blast_radius(lot_id)
 
 
-def freeze_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
-    return mock_lots.freeze_lot(lot_id, reason)
+def freeze_lot(lot_id: str, reason: str = "", actor: str = "demo.verifier") -> LotAuditEntry:
+    return mock_lots.freeze_lot(lot_id, reason, actor)
 
 
-def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
-    return mock_lots.recall_lot(lot_id, reason)
+def recall_lot(lot_id: str, reason: str = "", actor: str = "demo.recall-manager") -> LotAuditEntry:
+    return mock_lots.recall_lot(lot_id, reason, actor)
 
 
 def access_overview(role_id: str | None) -> AccessOverview:
@@ -116,3 +118,21 @@ def access_role_id(role_id: str | None) -> str:
 
 def access_record_allowed(role_id: str | None, permission: str, target: str = "") -> None:
     mock_access.record_allowed(role_id, permission, target)
+
+
+def audit_record(
+    actor: str,
+    action: str,
+    target: str = "",
+    outcome: str = "allowed",
+    context: dict[str, str] | None = None,
+) -> None:
+    mock_audit.record(actor, action, target, outcome, context)
+
+
+def audit_events(outcome: str = "all", action: str = "", actor: str = "") -> list[AuditEvent]:
+    return mock_audit.events(outcome=outcome, action=action, actor=actor)
+
+
+def audit_verify() -> IntegrityReport:
+    return mock_audit.verify()

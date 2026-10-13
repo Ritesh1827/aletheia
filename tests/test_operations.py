@@ -77,7 +77,8 @@ def test_incident_export_is_labelled_demo(client: TestClient) -> None:
 
 
 def test_incident_action_redirects_with_notice(client: TestClient) -> None:
-    res = client.post("/incidents/INC-1042/actions", params={"action": "note", "note": "checked seal"},
+    res = client.post("/incidents/INC-1042/actions",
+                      params={"as": "investigator", "action": "note", "note": "checked seal"},
                       follow_redirects=False)
     assert res.status_code == 303
     assert "notice=noted" in res.headers["location"]

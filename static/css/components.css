@@ -380,7 +380,9 @@
 
 .queue-filters { display: flex; align-items: end; gap: 12px; flex-wrap: wrap; margin: 14px 0; }
 .queue-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); }
-.queue-filters select {
+.queue-filters select,
+.queue-filters input[type="search"],
+.queue-filters input[type="text"] {
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -393,6 +395,8 @@
   padding: 6px 10px;
   min-height: 38px;
 }
+.queue-filters input[type="search"]::placeholder,
+.queue-filters input[type="text"]::placeholder { color: var(--text-muted); font-weight: 400; }
 
 .table-wrap { overflow-x: auto; border: 0; border-top: 1px solid var(--line-strong); }
 .queue { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }

@@ -195,18 +195,18 @@ def get_blast_radius(lot_id: str) -> BlastRadius:
     raise UnknownLotError(lot_id=lot_id.strip())
 
 
-def freeze_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
+def freeze_lot(lot_id: str, reason: str = "", actor: str = "demo.verifier") -> LotAuditEntry:
     detail = get_lot(lot_id)
     key = detail.lot_id
     if _frozen(key):
-        entry = LotAuditEntry(at=_DEMO_AT, actor="demo.verifier",
+        entry = LotAuditEntry(at=_DEMO_AT, actor=actor,
                               action=f"Freeze {key} re-confirmed",
                               outcome="already-frozen — no state change",
                               reason=reason.strip() or "Repeat confirmation; idempotent.")
         _audit(key).append(entry)
         return entry
     _FROZEN[key] = True
-    entry = LotAuditEntry(at=_DEMO_AT, actor="demo.verifier",
+    entry = LotAuditEntry(at=_DEMO_AT, actor=actor,
                           action=f"Freeze {key}",
                           outcome="frozen — outbound transfer held (demo operation)",
                           reason=reason.strip() or "Investigator hold pending conflict review.")
@@ -214,11 +214,11 @@ def freeze_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
     return entry
 
 
-def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
+def recall_lot(lot_id: str, reason: str = "", actor: str = "demo.recall-manager") -> LotAuditEntry:
     detail = get_lot(lot_id)
     key = detail.lot_id
     if _recalled(key):
-        entry = LotAuditEntry(at=_DEMO_AT, actor="demo.recall-manager",
+        entry = LotAuditEntry(at=_DEMO_AT, actor=actor,
                               action=f"Recall {key} re-confirmed",
                               outcome="already-recalled — no state change",
                               reason=reason.strip() or "Repeat confirmation; idempotent.")
@@ -226,7 +226,7 @@ def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
         return entry
     _RECALLED[key] = True
     _FROZEN[key] = True
-    entry = LotAuditEntry(at=_DEMO_AT, actor="demo.recall-manager",
+    entry = LotAuditEntry(at=_DEMO_AT, actor=actor,
                           action=f"Recall {key}",
                           outcome="recalled + frozen — pull-stock tasks queued (demo operation)",
                           reason=reason.strip() or "Clone conflict on TT-DEMO-0002.")

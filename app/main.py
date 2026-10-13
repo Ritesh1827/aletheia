@@ -8,7 +8,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app import config
-from app.routes import explorer, lots, operations, redteam, verify
+from app.routes import access, audit, explorer, lots, operations, redteam, verify
 
 mimetypes.add_type("application/javascript", ".js")
 
@@ -21,6 +21,8 @@ def create_app() -> FastAPI:
     app.include_router(explorer.router)
     app.include_router(redteam.router)
     app.include_router(lots.router)
+    app.include_router(access.router)
+    app.include_router(audit.router)
     return app
 
 
