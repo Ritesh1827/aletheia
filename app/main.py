@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import mimetypes
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app import config
 from app.routes import explorer, lots, operations, redteam, verify
+
+mimetypes.add_type("application/javascript", ".js")
 
 
 def create_app() -> FastAPI:

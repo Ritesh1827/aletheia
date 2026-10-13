@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from app import config
+from app.models.access import AccessOverview
 from app.models.explorer import (
     AddressDetails,
     BlockDetails,
@@ -17,6 +18,7 @@ from app.models.redteam import RedTeamLab, ScenarioResult
 from app.models.verify import VerificationVerdict
 from app.services import (
     chain_api,
+    mock_access,
     mock_explorer,
     mock_lots,
     mock_operations,
@@ -110,3 +112,23 @@ def recall_lot(lot_id: str, reason: str = "") -> LotAuditEntry:
     if config.is_demo() or lot_id.strip().upper() in chain_api._DEMO_LOT_IDS:
         return mock_lots.recall_lot(lot_id, reason)
     return chain_api.recall_lot(lot_id, reason)
+
+
+def access_overview(role_id: str | None) -> AccessOverview:
+    return mock_access.overview(role_id)
+
+
+def access_require(role_id: str | None, permission: str, target: str = "") -> str:
+    return mock_access.require(role_id, permission, target)
+
+
+def access_can(role_id: str | None, permission: str) -> bool:
+    return mock_access.can(role_id, permission)
+
+
+def access_role_id(role_id: str | None) -> str:
+    return mock_access.normalize_role(role_id)
+
+
+def access_record_allowed(role_id: str | None, permission: str, target: str = "") -> None:
+    mock_access.record_allowed(role_id, permission, target)

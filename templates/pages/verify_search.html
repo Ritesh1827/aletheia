@@ -1,16 +1,20 @@
 {% extends "layouts/base.html" %}
 {% block title %}Verify Product · TrustTrace{% endblock %}
+{% block scripts %}
+  <script src="/static/js/verify_scan.js" defer></script>
+{% endblock %}
 {% block content %}
 <header class="page-head reveal">
-  <p class="eyebrow">01 · Serial verification</p>
+  <p class="eyebrow">Serial verification</p>
 </header>
 
 {% if not_found %}
 <div class="alert warn reveal" role="alert">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
   <div>
     <strong>Unknown serial — “{{ not_found }}”.</strong>
     <p>No product identity matches this serial in the demo set. Check the value and try again, or try <span class="mono">TT-DEMO-0001</span>.</p>
+    {% if scan_note %}<p>{{ scan_note }}</p>{% endif %}
   </div>
 </div>
 {% endif %}
@@ -25,20 +29,22 @@
 </div>
 {% endif %}
 
-<section class="panel hero reveal reveal-1" aria-label="Serial lookup">
+<section class="panel hero archive reveal reveal-1" aria-label="Serial lookup">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Serial lookup</span>
+    <span class="eyebrow">Exhibit intake · serial lookup · demo data</span>
   </div>
-  <h1>Is this unit <em>what it claims</em> to be?</h1>
-  <p class="lede">Paste a raw QR payload or type the printed serial. The desk checks lot commitment, chain integrity, actor authorization, custody order, and movement plausibility — then shows its work. Every figure on this screen is <strong>demo data</strong>.</p>
-  <form action="/verify" method="get" x-data="{ busy: false }" @submit="busy = true">
+  <h1>Verify a serial against its history</h1>
+  <p class="lede">Paste a QR payload or type the printed serial. Five plausibility checks run against available records — then the verdict shows its work.</p>
+  <form action="/verify" method="get" x-data="{ busy: false }" @submit="busy = true" id="verify-form">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input id="serial" name="q" value="{{ q }}" type="text" autocomplete="off" spellcheck="false"
+      <input id="serial" name="q" value="{{ q }}" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false"
+             inputmode="text" enterkeyhint="search"
              placeholder="Scan or paste serial — e.g. TT-DEMO-0001" aria-label="Serial or QR payload" required minlength="4" />
       <span class="kbd" aria-hidden="true">⏎</span>
       <button class="btn primary" type="submit" :aria-busy="busy.toString()" :disabled="busy">Verify</button>
+      <button class="btn outline" type="button" id="scan-open" aria-haspopup="dialog">Scan code</button>
     </div>
     {% if form_error %}<div class="field" style="margin-top:8px"><div class="error" role="alert">{{ form_error }}</div></div>{% endif %}
     <div class="try-row">
@@ -48,6 +54,36 @@
       <a class="chip" href="/verify?q=TT-DEMO-ERR"><span class="mono">TT-DEMO-ERR</span> error path</a>
     </div>
   </form>
+
+  <div class="scan-modal" id="scan-modal" role="dialog" aria-modal="true" aria-labelledby="scan-title" hidden>
+    <div class="scan-card">
+      <div class="scan-head">
+        <div class="kicker">
+          <span class="rule-accent" aria-hidden="true"></span>
+          <span class="eyebrow" id="scan-title">Scan code · camera stays on this device</span>
+        </div>
+        <button class="scan-close-x" type="button" id="scan-close-x" aria-label="Close scanner">✕</button>
+      </div>
+      <p class="hint">Supports QR, EAN-13, EAN-8, UPC-A, UPC-E and Code 128. The camera starts only after you press Start. No frames or photos leave this device — only the decoded text is used.</p>
+      <div class="scan-frame" id="scan-region" aria-label="Camera preview"></div>
+      <div class="field" id="scan-cam-wrap" hidden>
+        <label for="scan-camera">Camera</label>
+        <select id="scan-camera" class="note-input" style="margin-bottom:0"></select>
+      </div>
+      <p class="scan-status" id="scan-status" role="status" aria-live="polite">Camera is off. Press Start to begin.</p>
+      <div class="scan-decoded" id="scan-decoded" hidden>
+        <p class="eyebrow">Decoded value</p>
+        <p class="mono" id="scan-decoded-value"></p>
+        <p class="hint" id="scan-decoded-note"></p>
+      </div>
+      <div class="action-row">
+        <button class="btn primary" type="button" id="scan-start">Start camera</button>
+        <button class="btn secondary" type="button" id="scan-use" disabled>Use scanned value</button>
+        <button class="btn ghost" type="button" id="scan-close">Cancel</button>
+      </div>
+      <p class="hint" style="margin:10px 0 0">No camera? Close this panel and type the serial above — manual entry always works.</p>
+    </div>
+  </div>
 </section>
 
 <section class="panel reveal reveal-2" aria-label="How to read a verdict">

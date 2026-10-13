@@ -12,6 +12,7 @@ from app.models.verify import VERDICT_CAVEAT, VERDICT_LABELS
 from app.services import deps
 from app.services.chain_api import ChainUnavailableError
 from app.services.mock_verify import MockBackendError, UnknownSerialError
+from app.services.scan_parse import parse_scan_payload
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -44,13 +45,16 @@ def verify_search(
 ) -> Response:
     query = q.strip()
     if query:
+        parsed = parse_scan_payload(query)
+        lookup = parsed.serial if parsed.status == "serial" else query
         try:
-            verdict = deps.get_verification(query)
+            verdict = deps.get_verification(lookup)
         except UnknownSerialError:
             return templates.TemplateResponse(
                 request,
                 "pages/verify_search.html",
-                {**shell("verify"), "q": q, "not_found": query},
+                {**shell("verify"), "q": q, "not_found": lookup,
+                 "scan_note": parsed.explanation if parsed.status == "ambiguous" else ""},
             )
         except MockBackendError as exc:
             return templates.TemplateResponse(

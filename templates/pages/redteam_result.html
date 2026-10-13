@@ -2,13 +2,13 @@
 {% block title %}{{ meta.name }} · Red-Team Lab · TrustTrace{% endblock %}
 {% block content %}
 <nav class="crumbs reveal" aria-label="Breadcrumb">
-  <a href="/red-team">05 · Red-Team Lab</a><span aria-hidden="true">/</span><span class="mono">{{ meta.id }}</span>
+  <a href="/red-team">Red-Team Lab</a><span aria-hidden="true">/</span><span class="mono">{{ meta.id }}</span>
 </nav>
 
-<section class="panel hero reveal reveal-1" aria-label="{{ meta.name }}">
+<section class="panel hero archive reveal reveal-1" aria-label="{{ meta.name }}">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Scenario · {{ meta.detector }} · demo data</span>
+    <span class="eyebrow">Finding file · {{ meta.id }} · {{ meta.detector }} · demo data</span>
   </div>
   <h1>{{ meta.name }}</h1>
   <p class="lede">{{ meta.objective }}</p>
@@ -71,7 +71,6 @@
   <div class="detail-main">
     {% if result.findings %}
     <div class="panel reveal reveal-2">
-      <p class="eyebrow">Result · findings</p>
       <h3>Evidence findings</h3>
       {% for f in result.findings %}
       <article class="finding">
@@ -92,8 +91,7 @@
     {% endif %}
 
     <div class="panel reveal reveal-2">
-      <p class="eyebrow">Result · event feed</p>
-      <h3>Live event feed</h3>
+      <h3>Event feed</h3>
       <ol class="mini-feed">
         {% for e in result.feed %}
         <li>
@@ -106,7 +104,6 @@
 
     {% if result.next_steps %}
     <div class="panel reveal reveal-3">
-      <p class="eyebrow">Result · next</p>
       <h3>Recommended next steps</h3>
       <ol class="steps">
         {% for s in result.next_steps %}
@@ -119,7 +116,6 @@
 
   <aside class="rail reveal reveal-2" aria-label="Result links">
     <div class="panel">
-      <p class="eyebrow">Result · evidence</p>
       <h3>Open affected records</h3>
       <div class="action-row">
         {% if result.verify_link %}<a class="btn secondary" href="{{ result.verify_link }}">Verify {{ result.serial }}</a>{% endif %}
@@ -132,7 +128,6 @@
 </div>
 {% else %}
 <div class="panel reveal reveal-2" aria-label="No result yet">
-  <p class="eyebrow">Result · not run</p>
   <h3>No result yet</h3>
   <p class="hint" style="margin:0">Fill the inputs above and run the scenario. Results render here with rules, evidence, and links — nothing is pre-declared.</p>
 </div>

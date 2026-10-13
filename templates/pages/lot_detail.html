@@ -2,7 +2,7 @@
 {% block title %}{{ lot.lot_id }} · Lot · TrustTrace{% endblock %}
 {% block content %}
 <nav class="crumbs reveal" aria-label="Breadcrumb">
-  <a href="/lots">06 · Lots</a><span aria-hidden="true">/</span><span class="mono">{{ lot.lot_id }}</span>
+  <a href="/lots">Lots</a><span aria-hidden="true">/</span><span class="mono">{{ lot.lot_id }}</span>
 </nav>
 
 {% if flash %}
@@ -22,12 +22,11 @@
 <section class="decision {{ tone }} reveal reveal-1" aria-label="Lot summary">
   <div class="decision-band"></div>
   <div class="decision-body">
-    <div class="decision-index" aria-hidden="true">{{ lot.committed_qty }}</div>
     <div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        {% if lot.freeze_state == 'frozen' %}<span class="badge watch"><span class="dot" aria-hidden="true"></span>FROZEN</span>
-        {% else %}<span class="badge good"><span class="dot" aria-hidden="true"></span>ACTIVE</span>{% endif %}
+        {% if lot.freeze_state == 'frozen' %}<span class="badge watch"><span class="dot" aria-hidden="true"></span>FROZEN</span>{% endif %}
         {% if lot.recall_state == 'recalled' %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>RECALLED</span>{% endif %}
+        {% if lot.freeze_state != 'frozen' and lot.recall_state != 'recalled' %}<span class="mono">{{ lot.lifecycle }}</span>{% endif %}
       </div>
       <div class="decision-code">{{ lot.lot_id }}</div>
       <div class="decision-label">{{ lot.product }} · {{ lot.committed_qty }} committed · {{ lot.lifecycle }} · demo data</div>
@@ -39,7 +38,6 @@
 <div class="detail-grid">
   <div class="detail-main">
     <div class="panel reveal reveal-2">
-      <p class="eyebrow">Lot · observed units</p>
       <h3>Recorded products</h3>
       {% if lot.products %}
       <div class="table-wrap" role="region" aria-label="Lot products" tabindex="0">
@@ -67,7 +65,6 @@
     </div>
 
     <div class="panel reveal reveal-2">
-      <p class="eyebrow">Lot · cases</p>
       <h3>Associated incidents</h3>
       {% if lot.incidents %}
       <ul class="lot-list">
@@ -84,7 +81,6 @@
     </div>
 
     <div class="panel reveal reveal-2">
-      <p class="eyebrow">Lot · anchors</p>
       <h3>Anchor status</h3>
       <ul class="lot-list">
         {% for a in lot.anchors %}
@@ -97,7 +93,6 @@
     </div>
 
     <div class="panel reveal reveal-3">
-      <p class="eyebrow">Lot · audit</p>
       <h3>Action audit trail</h3>
       {% if lot.audit %}
       <ul class="case-log">
@@ -114,16 +109,13 @@
 
   <aside class="rail reveal reveal-2" aria-label="Lot actions">
     <div class="panel">
-      <p class="eyebrow">Lot · trace</p>
       <h3>Blast radius</h3>
       <p class="hint">Lot → observed units → custodians → cases. Partial demo data, honestly labelled.</p>
       <div class="action-row">
         <a class="btn secondary" href="/lots/{{ lot.lot_id }}/blast-radius">Open blast radius →</a>
-        <a class="btn ghost" href="/lots">← All lots</a>
       </div>
     </div>
     <div class="panel" x-data="{ confirmFreeze: false, confirmRecall: false }">
-      <p class="eyebrow">Lot · act (demo)</p>
       <h3>Freeze &amp; recall</h3>
       <p class="hint">Demo operations only. State changes after the service confirms; repeats are idempotent.</p>
       <form action="/lots/{{ lot.lot_id }}/freeze" method="post" x-show="!confirmFreeze">

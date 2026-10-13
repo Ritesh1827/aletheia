@@ -3,7 +3,7 @@
 {% block title %}{{ d.id }} · Incident · TrustTrace{% endblock %}
 {% block content %}
 <nav class="crumbs reveal" aria-label="Breadcrumb">
-  <a href="/incidents">03 · Incidents</a><span aria-hidden="true">/</span><span class="mono">{{ d.id }}</span>
+  <a href="/incidents">Incidents</a><span aria-hidden="true">/</span><span class="mono">{{ d.id }}</span>
 </nav>
 
 {% if flash %}
@@ -17,12 +17,10 @@
 <section class="decision {{ tone }} reveal reveal-1" aria-label="Incident summary">
   <div class="decision-band"></div>
   <div class="decision-body">
-    <div class="decision-index" aria-hidden="true">{{ d.id.split('-')[1] }}</div>
     <div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
         {{ b.severity_badge(d.severity) }}
-        <span class="stat-pill s-{{ d.status }}">{{ d.status }}</span>
-        <span class="mono">{{ d.id }} · detected {{ d.detected_at }}</span>
+        <span class="mono">{{ d.id }} · {{ d.status }} · detected {{ d.detected_at }}</span>
       </div>
       <div class="decision-code">Serial {{ d.serial }}</div>
       <div class="decision-label">Case {{ d.id }} · linked serial verdict below stays authoritative</div>
@@ -109,7 +107,6 @@
     {% endif %}
 
     <div class="panel reveal reveal-3">
-      <p class="eyebrow">Case · next</p>
       <h3>Recommended next steps</h3>
       <ol class="steps">
         {% for s in d.next_steps %}
@@ -119,7 +116,6 @@
     </div>
 
     <div class="panel reveal reveal-3">
-      <p class="eyebrow">Case · log</p>
       <h3>Investigator action audit</h3>
       <ul class="case-log">
         {% for a in d.action_log %}
@@ -131,16 +127,13 @@
 
   <aside class="rail reveal reveal-2" aria-label="Case actions">
     <div class="panel">
-      <p class="eyebrow">Case · link</p>
-      <h3 class="mono" style="font-size:16px;margin:6px 0 4px">{{ d.serial }}</h3>
+      <h3 class="mono" style="font-size:16px;margin:0 0 8px">{{ d.serial }}</h3>
       <p class="hint">Serial verdict is authoritative — this case never overrides it.</p>
       <div class="action-row">
         <a class="btn secondary" href="/verify/{{ d.serial }}">Open serial verdict</a>
-        <a class="btn ghost" href="/incidents">← All incidents</a>
       </div>
     </div>
     <div class="panel">
-      <p class="eyebrow">Case · act (demo)</p>
       <h3>Investigation actions</h3>
       <p class="hint">Demo-safe only. Nothing writes to a backend; every action is labelled.</p>
       <form action="/incidents/{{ d.id }}/actions" method="post" x-data="{ note: '' }">

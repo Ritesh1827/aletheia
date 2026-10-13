@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#131311" />
   <title>{% block title %}TrustTrace · Verification Desk{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -10,13 +11,17 @@
   <link rel="stylesheet" href="/static/css/tokens.css" />
   <link rel="stylesheet" href="/static/css/base.css" />
   <link rel="stylesheet" href="/static/css/components.css" />
+  <link rel="stylesheet" href="/static/css/mobile.css" />
   {% block head %}{% endblock %}
   <script src="https://unpkg.com/htmx.org@2.0.4" defer></script>
   <script src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js" defer></script>
   <script src="/static/js/app.js" defer></script>
+  <script src="/static/js/mobile.js" defer></script>
+  {% block scripts %}{% endblock %}
 </head>
 <body>
 <div class="shell" x-data="{ navOpen: false }" :class="navOpen ? 'nav-open' : ''">
+  <div class="nav-scrim" data-nav-close aria-hidden="true"></div>
   <aside class="sidebar" aria-label="Primary">
     <div class="brand">
       <span class="brand-mark" aria-hidden="true">T</span>
@@ -24,9 +29,12 @@
         <span class="brand-name">TrustTrace</span>
         <span class="brand-sub">Verification Desk</span>
       </span>
+      <button class="btn ghost icon drawer-close" type="button" data-nav-close aria-label="Close navigation">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
     <nav class="nav" aria-label="Sections">
-      <div class="eyebrow nav-group">01 — Operate</div>
+      <div class="eyebrow nav-group">Operate</div>
       <a class="nav-item {% if active == 'overview' %}active{% endif %}" href="/overview" {% if active == 'overview' %}aria-current="page"{% endif %}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
         Control Tower
@@ -43,7 +51,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
         Lots &amp; Recall
       </a>
-      <div class="eyebrow nav-group">02 — Evidence</div>
+      <div class="eyebrow nav-group">Evidence</div>
       <a class="nav-item {% if active == 'explorer' %}active{% endif %}" href="/explorer" {% if active == 'explorer' %}aria-current="page"{% endif %}>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
         Block Explorer
@@ -52,7 +60,7 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
         Red-Team Lab
       </a>
-      <div class="eyebrow nav-group">03 — Govern</div>
+      <div class="eyebrow nav-group">Govern</div>
       <span class="nav-item disabled" title="Milestone 4">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="18" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         Access Control <span class="nav-tag">M4</span>
@@ -70,20 +78,31 @@
 
   <div class="main">
     <header class="topbar">
-      <button class="btn ghost menu-toggle" type="button" @click="navOpen = !navOpen" aria-label="Toggle navigation">
+      <button class="btn ghost menu-toggle" type="button" data-nav-toggle aria-label="Toggle navigation" aria-expanded="false">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
-      <span class="topbar-index">TT / 01</span>
-      <form class="searchbar" action="/verify" method="get" role="search">
+      <a class="brand-mini" href="/verify" aria-label="TrustTrace home">
+        <span class="brand-mark" aria-hidden="true">T</span><span>TrustTrace</span>
+      </a>
+      <span class="topbar-index">TT</span>
+      <form class="searchbar searchbar--desktop" action="/verify" method="get" role="search">
         <input name="q" type="search" placeholder="Search serial — try TT-DEMO-0001" aria-label="Global serial search" value="{{ q if q is defined else '' }}" />
         <button class="btn secondary" type="submit">Search</button>
       </form>
+      <div class="topbar-actions">
+        <button class="icon-btn" type="button" data-search-toggle aria-label="Toggle search" aria-expanded="false">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+      </div>
+      <form class="searchbar searchbar--mobile" action="/verify" method="get" role="search">
+        <input name="q" type="search" placeholder="Serial — e.g. TT-DEMO-0001" aria-label="Global serial search" value="{{ q if q is defined else '' }}" />
+        <button class="btn secondary" type="submit">Go</button>
+      </form>
       <div class="topbar-right">
-        <span class="env-pill"><i></i>ENV · {{ chain_label }}</span>
-        <span class="account" title="Demo session — role switching arrives with RBAC (M4)">
-          <span class="avatar" aria-hidden="true">DV</span>
-          <span class="who"><strong>Demo Verifier</strong> · read-only</span>
-        </span>
+        <a class="session-chip" href="/access" title="Demo session — {{ user_name | default('Demo Verifier') }} · switch role in Access Control">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>{{ role_name | default('Read-only Verifier') }} · demo</span>
+        </a>
       </div>
     </header>
 
@@ -94,14 +113,44 @@
     </div>
     {% endif %}
 
-    <main class="content">
+    <main class="content" id="main">
       <div class="reading">
         {% block content %}{% endblock %}
         <p class="footer-note">Verdicts assess available records and history — never absolute physical authenticity. Backend authorization is required for privileged actions.</p>
       </div>
     </main>
+    {% block mobile_dock %}{% endblock %}
   </div>
 </div>
+<nav class="tabbar" aria-label="Primary mobile">
+  <a href="/verify" {% if active == 'verify' %}aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    <span>Verify</span>
+  </a>
+  <a href="/overview" {% if active == 'overview' %}aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+    <span>Tower</span>
+  </a>
+  <a href="/lots" {% if active == 'lots' %}aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+    <span>Lots</span>
+  </a>
+  <a href="/incidents" {% if active == 'incidents' %}aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4m0 4h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+    <span>Cases</span>
+  </a>
+  <a href="/explorer" {% if active == 'explorer' %}aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <span>Explore</span>
+  </a>
+  <a href="/red-team" {% if active == 'redteam' %}aria-current="page"{% endif %}>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+    <span>Lab</span>
+  </a>
+</nav>
+<button class="to-top" type="button" data-to-top aria-label="Back to top">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+</button>
 <div class="toast-slot" id="toasts" aria-live="polite"></div>
 </body>
 </html>

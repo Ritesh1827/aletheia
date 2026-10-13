@@ -5,12 +5,12 @@
   <a href="/explorer">04 · Explorer</a><span aria-hidden="true">/</span><span>search</span>
 </nav>
 
-<section class="panel hero reveal reveal-1" aria-label="Explorer search">
+<section class="panel hero archive reveal reveal-1" aria-label="Explorer search">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Search · demo index</span>
+    <span class="eyebrow">Archive query · demo index</span>
   </div>
-  <h1>Search the <em>anchor index</em></h1>
+  <h1>Search the anchor index</h1>
   <p class="lede">Block height or hash, transaction hash, Merkle root, lot ID, serial, or actor address.</p>
   <form action="/explorer/search" method="get" x-data="{ busy: false }" @submit="busy = true">
     <div class="cmd-search">
@@ -33,8 +33,7 @@
 </div>
 {% elif hits %}
 <section class="panel reveal reveal-2" aria-label="Search results">
-  <p class="eyebrow">Results · {{ hits | length }} match{{ 'es' if hits | length != 1 else '' }} for “{{ q }}”</p>
-  <h3>Matches</h3>
+  <h3>{{ hits | length }} match{{ 'es' if hits | length != 1 else '' }} for “{{ q }}”</h3>
   <ul class="lot-list">
     {% for hit in hits %}
     <li>

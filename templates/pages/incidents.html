@@ -3,7 +3,7 @@
 {% block title %}Incidents · TrustTrace{% endblock %}
 {% block content %}
 <header class="page-head reveal">
-  <p class="eyebrow">03 · Incident queue</p>
+  <p class="eyebrow">Incident queue</p>
 </header>
 
 {% if load_error %}
@@ -24,8 +24,7 @@
 {% endif %}
 
 <section class="panel reveal reveal-1" aria-label="Incident queue">
-  <p class="eyebrow">Queue · {{ incidents | length }} shown · demo data</p>
-  <h3>All incidents</h3>
+  <h3>All incidents · {{ incidents | length }} shown</h3>
   <form class="queue-filters" action="/incidents" method="get" aria-label="Filter incidents">
     <label>Severity
       <select name="severity" onchange="this.form.submit()">

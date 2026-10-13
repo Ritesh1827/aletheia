@@ -16,15 +16,14 @@
 {%- endmacro %}
 {% block content %}
 <nav class="crumbs reveal" aria-label="Breadcrumb">
-  <a href="/lots">06 · Lots</a><span aria-hidden="true">/</span><a href="/lots/{{ lot.lot_id }}" class="mono">{{ lot.lot_id }}</a><span aria-hidden="true">/</span><span>blast-radius</span>
+  <a href="/lots">Lots</a><span aria-hidden="true">/</span><a href="/lots/{{ lot.lot_id }}" class="mono">{{ lot.lot_id }}</a><span aria-hidden="true">/</span><span>blast-radius</span>
 </nav>
 
 <section class="decision {% if blast.completeness == 'unknown' %}neutral{% elif blast.completeness == 'partial' %}watch{% else %}good{% endif %} reveal reveal-1" aria-label="Blast radius summary">
   <div class="decision-band"></div>
   <div class="decision-body">
-    <div class="decision-index" aria-hidden="true">{{ blast.affected }}</div>
     <div>
-      <span class="badge {% if blast.completeness == 'unknown' %}neutral{% elif blast.completeness == 'partial' %}watch{% else %}good{% endif %}"><span class="dot" aria-hidden="true"></span>{{ blast.completeness | upper }} TRACE</span>
+      <span class="mono">{{ blast.completeness }} trace · affected {{ blast.affected }} · unlocated {{ blast.unlocated }}</span>
       <div class="decision-code">Blast radius · {{ blast.lot_id }}</div>
       <div class="decision-label">affected {{ blast.affected }} · sold {{ blast.sold }} · unsold {{ blast.unsold }} · unlocated {{ blast.unlocated }} · demo data</div>
       <p class="decision-expl">{{ blast.completeness_note }}</p>
@@ -35,7 +34,6 @@
 <div class="detail-grid">
   <div class="detail-main">
     <div class="panel reveal reveal-2">
-      <p class="eyebrow">Trace · hierarchy</p>
       <h3>Lot → units → custodians → cases</h3>
       {% if blast.tree %}
       {{ blast_tree(blast.tree) }}
@@ -49,10 +47,8 @@
   </div>
   <aside class="rail reveal reveal-2" aria-label="Blast links">
     <div class="panel">
-      <p class="eyebrow">Trace · links</p>
       <h3>Related records</h3>
       <div class="action-row">
-        <a class="btn secondary" href="/lots/{{ lot.lot_id }}">← Lot {{ lot.lot_id }}</a>
         {% for i in blast.incident_links %}
         <a class="btn outline" href="/incidents/{{ i }}">Open {{ i }}</a>
         {% endfor %}

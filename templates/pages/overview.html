@@ -3,7 +3,7 @@
 {% block title %}Control Tower · TrustTrace{% endblock %}
 {% block content %}
 <header class="page-head reveal">
-  <p class="eyebrow">02 · Control Tower</p>
+  <p class="eyebrow">Control Tower</p>
 </header>
 
 {% if load_error %}
@@ -17,13 +17,13 @@
 </div>
 {% else %}
 
-<section class="panel hero reveal reveal-1" aria-label="Tower status">
+<section class="panel hero archive reveal reveal-1" aria-label="Tower status">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Shift status · updated {{ data.updated_at }} · demo data</span>
+    <span class="eyebrow">Shift log · updated {{ data.updated_at }} · demo data</span>
   </div>
-  <h1>What needs <em>attention</em> right now?</h1>
-  <p class="lede">Two critical cases share one contested serial. Everything below is a mock operations feed — open a case to see its evidence, or verify the serial directly.</p>
+  <h1>Control Tower</h1>
+  <p class="lede">Two critical cases share one contested serial. Open a case for its evidence, or verify the serial directly.</p>
   <div class="metric-grid">
     {% for m in data.metrics %}
     <a class="metric" href="{{ m.link }}">
@@ -36,8 +36,7 @@
 </section>
 
 <section class="panel reveal reveal-2" aria-label="Incident queue">
-  <p class="eyebrow">Queue · {{ data.incidents | length }} shown</p>
-  <h3>Incident queue</h3>
+  <h3>Incident queue · {{ data.incidents | length }} shown</h3>
   <form class="queue-filters" action="/overview" method="get" aria-label="Filter incidents">
     <label>Severity
       <select name="severity" onchange="this.form.submit()">
@@ -86,7 +85,6 @@
 
 <div class="tower-grid">
   <section class="panel reveal reveal-2" aria-label="Recent custody events">
-    <p class="eyebrow">Flow · custody</p>
     <h3>Recent custody events</h3>
     <ol class="mini-feed">
       {% for e in data.custody_events %}
@@ -100,7 +98,6 @@
   </section>
 
   <section class="panel reveal reveal-2" id="anchors" aria-label="Anchor health">
-    <p class="eyebrow">Chain · anchors</p>
     <h3>Anchor health</h3>
     <dl class="kv kv-tight">
       <dt>Latest anchor</dt><dd class="mono">{{ data.anchor_health.latest_anchor }}</dd>
@@ -113,7 +110,6 @@
   </section>
 
   <section class="panel reveal reveal-3" id="lots" aria-label="Lot status">
-    <p class="eyebrow">Stock · lots</p>
     <h3>Lot status</h3>
     <ul class="lot-list">
       {% for lot in data.lots %}
@@ -127,7 +123,6 @@
   </section>
 
   <section class="panel reveal reveal-3" id="integrity" aria-label="Recent integrity checks">
-    <p class="eyebrow">Trust · integrity</p>
     <h3>Recent integrity checks</h3>
     <ul class="check-list">
       {% for c in data.integrity %}
@@ -143,12 +138,10 @@
 </div>
 
 <section class="panel reveal reveal-3" aria-label="Quick actions">
-  <p class="eyebrow">Act · demo-safe</p>
   <h3>Quick actions</h3>
   <div class="action-row">
     <a class="btn primary" href="/verify">Verify a serial</a>
     <a class="btn secondary" href="/incidents/INC-1042">Inspect INC-1042</a>
-    <a class="btn outline" href="/verify/TT-DEMO-0002">Open contested serial</a>
   </div>
 </section>
 

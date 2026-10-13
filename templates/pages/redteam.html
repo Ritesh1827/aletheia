@@ -2,7 +2,7 @@
 {% block title %}Red-Team Lab · TrustTrace{% endblock %}
 {% block content %}
 <header class="page-head reveal">
-  <p class="eyebrow">05 · Red-Team Lab</p>
+  <p class="eyebrow">Red-Team Lab</p>
 </header>
 
 {% if forbidden %}
@@ -16,14 +16,14 @@
 </div>
 {% else %}
 
-<section class="panel hero reveal reveal-1" aria-label="Red-Team Lab">
+<section class="panel hero archive reveal reveal-1" aria-label="Red-Team Lab">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Simulated attacks · demo data only</span>
+    <span class="eyebrow">Adversarial file · simulated attacks · demo data only</span>
   </div>
-  <h1>Break it <em>safely</em> here.</h1>
-  <p class="lede">Six attack scenarios against the demo trust fabric — no production system is touched, no real backend is under attack. Each run evaluates deterministic demo rules against your inputs and shows its work: triggered rules, evidence refs, and links to the affected serial, case, and anchor.</p>
-  <p class="hint" style="margin:0">Demo gate: execution is allowed because this session is a read-only demo with no backend writes. RBAC UI arrives later; the server must still authorize every privileged action independently.</p>
+  <h1>Red-Team Lab</h1>
+  <p class="lede">Six attack scenarios against the demo trust fabric. Each run evaluates deterministic demo rules and files its findings below — no production system is touched.</p>
+  <p class="hint" style="margin:0">Demo gate: execution is allowed because this session is a read-only demo with no backend writes. The server must still authorize every privileged action independently.</p>
 </section>
 
 {% if form_error %}
@@ -34,8 +34,7 @@
 {% endif %}
 
 <section class="panel reveal reveal-2" aria-label="Scenarios">
-  <p class="eyebrow">Scenarios · {{ lab.scenarios | length }} · demo rules</p>
-  <h3>Attack scenarios</h3>
+  <h3>Attack scenarios · {{ lab.scenarios | length }} demo rules</h3>
   <div class="scenario-grid">
     {% for s in lab.scenarios %}
     <article class="scenario {% if selected == s.id %}current{% endif %}">
@@ -43,15 +42,11 @@
         {% if s.severity == 'critical' %}<span class="badge critical"><span class="dot" aria-hidden="true"></span>CRITICAL</span>
         {% elif s.severity == 'watch' %}<span class="badge watch"><span class="dot" aria-hidden="true"></span>WATCH</span>
         {% else %}<span class="badge info"><span class="dot" aria-hidden="true"></span>INFO</span>{% endif %}
-        {% if s.has_run %}<span class="stat-pill s-resolved">ran</span>
-        {% else %}<span class="stat-pill">not run</span>{% endif %}
+        {% if s.has_run %}<span class="hint">ran</span>{% endif %}
       </div>
-      <h4>{{ s.name }}</h4>
+      <h4><a href="/red-team/{{ s.id }}{% if ran %}?ran={{ ran }}{% endif %}">{{ s.name }}</a></h4>
       <p>{{ s.objective }}</p>
       <p class="hint">Detector: <span class="mono">{{ s.detector }}</span></p>
-      <div class="action-row">
-        <a class="btn {% if selected == s.id %}primary{% else %}secondary{% endif %}" href="/red-team/{{ s.id }}{% if ran %}?ran={{ ran }}{% endif %}">Open scenario →</a>
-      </div>
     </article>
     {% endfor %}
   </div>
@@ -60,8 +55,7 @@
 {% if selected %}
 <section class="panel reveal reveal-3" aria-label="Scenario execution">
   {% set meta = lab.scenarios | selectattr('id', 'equalto', selected) | first %}
-  <p class="eyebrow">Execute · {{ meta.name }}</p>
-  <h3>Run scenario</h3>
+  <h3>Run scenario · {{ meta.name }}</h3>
   <form action="/red-team/{{ selected }}/run" method="post" x-data="{ busy: false }" @submit="busy = true">
     <input type="hidden" name="ran" value="{{ ran }}" />
     {% for f in fields %}

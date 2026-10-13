@@ -2,7 +2,7 @@
 {% block title %}Lots & Recall · TrustTrace{% endblock %}
 {% block content %}
 <header class="page-head reveal">
-  <p class="eyebrow">06 · Lots &amp; Recall</p>
+  <p class="eyebrow">Lots &amp; Recall</p>
 </header>
 
 {% if load_error %}
@@ -23,13 +23,13 @@
 </div>
 {% endif %}
 
-<section class="panel hero reveal reveal-1" aria-label="Lot inventory">
+<section class="panel hero archive reveal reveal-1" aria-label="Lot inventory">
   <div class="kicker">
     <span class="rule-accent" aria-hidden="true"></span>
-    <span class="eyebrow">Inventory · {{ total }} lots · demo data</span>
+    <span class="eyebrow">Inventory ledger · {{ total }} lots · demo data</span>
   </div>
-  <h1>Which lots are <em>exposed?</em></h1>
-  <p class="lede">Committed lots, their anchors, open cases, and freeze state. Quantities below are committed demo figures — only observed units carry evidence.</p>
+  <h1>Lot inventory &amp; recall desk</h1>
+  <p class="lede">Committed lots, their anchors, open cases, and freeze state. Only observed units carry evidence.</p>
   <form action="/lots" method="get">
     <div class="cmd-search">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
@@ -53,7 +53,7 @@
 </section>
 
 <section class="panel reveal reveal-2" aria-label="Lot inventory table">
-  <p class="eyebrow">Lots · {{ lots | length }} of {{ total }} · page {{ page }} of {{ pages }}</p>
+  <h3>Lots · {{ lots | length }} of {{ total }}</h3>
   {% if lots %}
   <div class="table-wrap" role="region" aria-label="Lots table" tabindex="0">
     <table class="queue">
@@ -67,8 +67,8 @@
           <td>{{ l.product }}</td>
           <td>{{ l.committed_qty }}</td>
           <td>{{ l.anchor_state }}</td>
-          <td>{% if l.freeze_state == 'frozen' %}<span class="stat-pill s-open">frozen</span>{% else %}<span class="stat-pill">active</span>{% endif %}</td>
-          <td>{% if l.recall_state == 'recalled' %}<span class="stat-pill i-fail">recalled</span>{% else %}<span class="stat-pill">none</span>{% endif %}</td>
+          <td>{% if l.freeze_state == 'frozen' %}<span class="stat-pill s-open">frozen</span>{% else %}active{% endif %}</td>
+          <td>{% if l.recall_state == 'recalled' %}<span class="stat-pill i-fail">recalled</span>{% else %}—{% endif %}</td>
           <td>{{ l.incidents_open }}</td>
         </tr>
         {% endfor %}
